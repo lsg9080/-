@@ -10,11 +10,11 @@ import axios from 'axios'
 // import QS from 'qs'
 
 import './thirdParty/UI'
-import { defaultUrl, baseURL } from './config/env'
+import { defaultUrl} from './config/env'
 import './common/base.css'
 // import './common/stylus/index.styl'
 
-import request from './common/js/fetch';
+// import request from './common/js/fetch';
 
 import 'vant/lib/index.css';
 
@@ -22,11 +22,14 @@ import components from './common/utils/components'
 Vue.use(components)
 
 
+// import { request } from './https'
+
+
 Vue.config.productionTip = false
 Vue.prototype.$axios = axios
-Vue.prototype.baseURL = baseURL
+// Vue.prototype.baseURL = baseURL
 Vue.prototype.$defaultUrl = defaultUrl
-Vue.prototype.request = request
+// Vue.prototype.request = request
 
 
 Vue.config.productionTip = false
@@ -61,6 +64,7 @@ router.beforeEach((to, from, next) => {
       for (let key in config) {
         Vue.prototype[key] = config[key];
       }
+      // axios.defaults.baseURL = Vue.prototype.baseUrl;
       console.log(Vue.prototype.baseUrl)  // 验证是否已经把属性挂在了Vue上
       resolve();
     }).catch((error) => {

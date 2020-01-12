@@ -10,7 +10,7 @@ export default {
 		wx.config({
 			debug: process.env.NODE_ENV == 'production' ? false : true,//这里一般在测试阶段先用true，等打包给后台的时候就改回false,
 			appId: data.appId,
-			timestamp: data.timestamp,
+			timestamp: data.timeStamp,
 			nonceStr: data.nonceStr,
 			signature: data.signature,
 			jsApiList: ['getBrandWCPayRequest']
@@ -39,7 +39,7 @@ export default {
 					"getBrandWCPayRequest",
 					{
 						appId: data.appId, //公众号名称，由商户传入
-						timeStamp: data.timestamp, //时间戳，自1970年以来的秒数
+						timeStamp: data.timeStamp, //时间戳，自1970年以来的秒数
 						nonceStr: data.nonceStr, //随机串
 						package: data.package, //订单详情扩展字符串
 						signType: data.signType?data.signType:'MD5', //微信签名方式：

@@ -548,12 +548,14 @@ export default {
         .then(res => {
           if (res.result == "0") {
             let wxOptions = {
+              appId: res.appId,
               nonceStr: res.nonceStr,
               orderCode: res.orderCode,
               package: res.package,
               payId: res.payId,
               paySign: res.paySign,
-              prepay_id: res.prepay_id
+              prepay_id: res.prepay_id,
+              timeStamp:res.timeStamp
             };
             if (res.prepay_id) {
               this.wechatSubmit(params, wxOptions);
@@ -679,7 +681,6 @@ tradeId: null
 orderCode: "WX202001101836187653"
        */
       let opt = {
-        appId: wechatAppId,
         signType: "MD5"
       };
       console.log(wxOptions, opt);

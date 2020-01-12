@@ -176,12 +176,15 @@ export default {
         .then(res => {
           if (res.result == "0") {
             let wxOptions = {
+              appId: res.appId,
               nonceStr: res.nonceStr,
-              orderCode: res.orderCode,
               package: res.package,
               payId: res.payId,
               paySign: res.paySign,
               prepay_id: res.prepay_id,
+              timeStamp:res.timeStamp,
+
+              orderCode: res.orderCode,
               price: params.price
             };
             if (res.prepay_id) {
@@ -203,7 +206,7 @@ export default {
     },
     wechatPay(wxOptions) {
       console.log("微信支付");
-      wxOptions = {
+      /*wxOptions = {
         prepay_id: "wx10183618537375bdc6483fea1794844000",
         appId: "wxcf2261853abfc265",
         timeStamp: "1578652578",
@@ -213,13 +216,14 @@ export default {
         payId: "WX20200110183618765311926182",
         tradeId: null,
         orderCode: "WX202001101836187653"
-      };
+      };*/
       let opt = {
-        appId: wechatAppId,
+        tradeId: "",
         signType: "MD5"
       };
       Object.assign(wxOptions, opt);
       console.log("从后端取到的微信参数：" + JSON.stringify(wxOptions));
+      payUtils.WxConfig(wxOptions);     
       payUtils.WXJSApi(
         wxOptions,
         () => {

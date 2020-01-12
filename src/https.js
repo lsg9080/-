@@ -2,36 +2,16 @@ import axios from 'axios'
 import qs from 'qs'
 import { baseURL } from "./config/env"
 import store from './store'
+import { Toast } from 'vant'
 
-
-// 请求文件内容
-
-/*function getServerConfig () {
-  return new Promise ((resolve, reject) => {
-    axios.get('./serverConfig.json').then((result) => {
-      console.log(result) 
-      let config = result.data;
-      console.log(config.baseUrl) 
-      resolve(config.baseUrl);
-    }).catch((error) => {
-      console.log(error);
-      reject()
-    })
-  })
-}
-async function main () {
-  console.log(await getServerConfig())
-  return await getServerConfig();
-}*/
 var instance = axios.create({
   baseURL: baseURL,
   timeout: 5000
 });
 
-
 //请求拦截
 instance.interceptors.request.use(config => {
-  console.log(store.getters.openid)
+  console.log(config)
   let defaultOpstion = { weixinNo: store.getters.openid };
   if (config.params != '' || config.data != '') {
     if (!config.data.authCode) {
@@ -49,6 +29,7 @@ instance.interceptors.request.use(config => {
   return config;
 },
   error => {
+    Toast('网络异常，请稍后再试')
     return Promise.reject(error);
   }
 )
@@ -62,8 +43,6 @@ instance.interceptors.response.use((res) => {
 })
 // axios 参数处理
 function request(url = url, data = {}, method = 'post', headers = {}) {
-
-
   return new Promise((resolve, reject) => {
     const options = {
       url: url,

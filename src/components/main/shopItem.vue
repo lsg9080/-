@@ -26,7 +26,7 @@
         <div class="clearboth"></div>
       </div>
       <!-- select time info -->
-      <div class="sm_sti" v-show="sm_sti_show" @click.stop="sm_stiReserve">
+      <div class="sm_sti" @click.stop="sm_stiReserve">
         <img class="sm_sti_reserve" src="../../assets/Smain/yudin.png" />
         <label class="sm_sti_txt">{{shop_select_time}}</label>
         <img class="sm_sti_down" src="../../assets/Smain/down.png" />
@@ -421,12 +421,13 @@ export default {
       num: 1,
       id: 1
     };
-    this.$store.commit("ADD_CART", item);*/
+    this.$store.commit("ADD_CART", item);
+    */
   },
   computed: {
     ...mapState(["restaurantId"]),
     options() {
-      return { click: false, bounce: false };
+      return { click: false, stopPropagation: true, bounce: false };
     }
   },
   methods: {
@@ -675,7 +676,7 @@ export default {
       this.$store.commit("ADD_CART", item);
     },
     // 菜谱面板 减少菜谱
-    sm_panel_reduce(id, item) {
+    sm_panel_reduce(id) {
       var $this = this;
       for (var i = 0; i < $this.sm_fi_menulist.length; i++) {
         if ($this.sm_fi_menulist[i].id === id) {
@@ -685,7 +686,6 @@ export default {
       // 处理submit信息
       $this.sm_subPanel();
 
-      this.$store.commit("REDUCE_CART", item);
     },
     // 处理submit信息
     sm_subPanel() {

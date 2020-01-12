@@ -51,12 +51,14 @@ export default new Router({
     {
       path: '/slogin',
       name: 'Slogin',
-      component: Slogin
+      component: Slogin,
+      meta: { title: '登录'}
     },
     {
       path: '/spersonalCenter',
       name: 'SpersonalCenter',
-      component: SpersonalCenter
+      component: SpersonalCenter,
+      meta: { title: '个人中心'}
     },
     {
       path: '/srecomm',

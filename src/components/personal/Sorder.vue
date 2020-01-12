@@ -57,7 +57,7 @@
 </template>
 
 <script>
-import { getOrderList, orderCancel,orderPaid ,getPrepayid} from "@/serve";
+import { getOrderList, orderCancel, orderPaid, getPrepayid } from "@/serve";
 import payUtils from "@/common/js/wechat";
 import { encryptDes } from "@/common/js/utils";
 import { wechatAppId } from "@/config/auth";
@@ -65,7 +65,7 @@ import { formatDate } from "@/getParams";
 export default {
   data() {
     return {
-      pageSize: 20,
+      pageSize: '20',
       pageNum: -1,
       so_noOrder: false,
       orderList: [],
@@ -114,7 +114,6 @@ export default {
               this.finished = true;
               this.so_noOrder = this.pageNum === 0 ? true : false;
             } else {
-       
               if (this.pageNum == 0) {
                 this.orderList = res.data.data;
               } else {
@@ -140,6 +139,7 @@ export default {
         })
         .catch(err => {
           this.loading = false;
+          this.finished = true;
           console.log(err);
         });
     },
@@ -147,44 +147,44 @@ export default {
      * 倒计时：订单有效期（1小时）,设置订单毫秒数， 3*60*1000
      */
     cuntDown: function(order) {
-      // order.createTime = "2020-01-11 13:55:21";
+      // order.createTime = "2020/01/11 13:55:21";
       var time =
-        new Date(order.createTime).getTime() +
+        Number(new Date(order.createTime.replace(/-/g, "/")).getTime()) +
         1 * 60 * 60 * 1000 -
-        new Date().getTime();
+        Number(new Date().getTime());
+
       if (time > 0) {
         order.left_time = time;
       } else {
         //超时，订单自动取消
-        // this.cancelOrder(order.orderId);
+        this.cancelOrder(order.orderId);
       }
     },
-    
+
     cancelOrder(id) {
       orderCancel(id).then(res => {
         if (res.data.result == 0) {
           this.$toast({ message: res.data.note });
-          this.loadOrder(this.pageSize,0);
-        }else{
+          this.loadOrder(this.pageSize, 0);
+        } else {
           this.$toast({ message: res.msg });
         }
       });
     },
     payOrder(item) {
-      console.log(item)
+      console.log(item);
       if (item.paymentId == 1) {
-        orderPaid(item.orderId)
-          .then(res => {
-            if (res.result == "0") {
-              this.$toast({ message: "支付成功！" });
+        orderPaid(item.orderId).then(res => {
+          if (res.result == "0") {
+            this.$toast({ message: "支付成功！" });
+            this.init();
+          } else {
+            this.$toast.fail(res.msg);
+            setTimeout(function() {
               this.init();
-            } else {
-              this.$toast.fail(res.msg);
-              setTimeout(function() {
-                this.init();
-              }, 2000);
-            }
-          })
+            }, 2000);
+          }
+        });
       } else {
         var body = "订单消费" + item.amount + "元";
         var price = item.amount;
@@ -208,7 +208,7 @@ export default {
           amountEncrypt: amountEncrypt
         };
         getPrepayid(params).then(res => {
-          console.log(res)
+          console.log(res);
           if (res.result == "0") {
             let wxOptions = {
               appId: res.appId,
@@ -221,14 +221,17 @@ export default {
             };
             console.log("从后端取到的微信参数：" + JSON.stringify(wxOptions));
             if (res.prepay_id) {
-              payUtils.WXJSApi(wxOptions);
+              payUtils.WxConfig(wxOptions);
+              payUtils.WXJSApi(wxOptions, () => {
+                this.$router.push({ name: "success" });
+              });
             }
-          }else{
-            this.$toast(res.msg)
+          } else {
+            this.$toast(res.msg);
           }
         });
       }
-    },
+    }
   }
 };
 </script>

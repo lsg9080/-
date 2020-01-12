@@ -132,7 +132,6 @@ this.$store.commit("RECORD_OPENID", 'o1ixfwI3WBM1zq91r_Rh7vvcJj-s');
           if (res.result === "0") {
             console.log("已经绑定过");
             window.localStorage.setItem("energy", res.data.energy);
-            this.$store.commit('RECORD_RESTAURANT_ID',res.data.shopId)
             this.$router.push({
               name: this.cells[index].route
             });

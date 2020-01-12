@@ -43,5 +43,6 @@ import {
   Vue.use(CountDown);
 
 
-  import { ScrollNav } from 'cube-ui';
-  Vue.use(ScrollNav);
+  // import { ScrollNav,Scroll } from 'cube-ui';
+  // Vue.use(ScrollNav);
+  // Vue.use(Scroll);

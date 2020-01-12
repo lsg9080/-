@@ -14,11 +14,13 @@ if (process.env.NODE_ENV == 'development') {
     globalUrlFile = "";
 }
 if (process.env.NODE_ENV == 'production') {
+    
     baseURL = "https://staffapis.wincome.group/staffOrderingH5.API/";
     globalUrlFile = "";
 }
 
 defaultUrl = 'http://ceshi.wincome.group'
+
 export {
     baseURL,
     globalUrlFile,

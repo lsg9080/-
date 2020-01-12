@@ -24,6 +24,7 @@ export default {
   margin: 0;
   padding: 0;
   -webkit-overflow-scrolling:touch;
+  line-height: 20px;
 }
 /* 清楚浮动 */
 .clearboth{

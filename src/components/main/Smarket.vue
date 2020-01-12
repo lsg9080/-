@@ -9,6 +9,7 @@
         <div class="sm_bi_cont">
           <div class="sm_bi_cont_name">
             <label>{{sm_shopInfo.shopName}}</label>
+            <!-- <van-button plain hairline round color="#13227a" size="small">换超市</van-button> -->
             <button @click="sm_switchShopInfo">换超市</button>
             <img
               v-if="sm_shopInfo.contact"
@@ -338,7 +339,7 @@ export default {
   computed: {
     ...mapState(["supermarketId"]),
     options() {
-      return { click: false, bounce: false };
+      return { click: false, stopPropagation: true, bounce: false };
     }
   },
   methods: {

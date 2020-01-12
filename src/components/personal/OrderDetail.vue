@@ -210,7 +210,9 @@ export default {
             console.log("从后端取到的微信参数：" + JSON.stringify(wxOptions));
             if (res.prepay_id) {
               payUtils.WxConfig(wxOptions);
-              payUtils.WXJSApi(wxOptions);
+              payUtils.WXJSApi(wxOptions, () => {
+        this.$router.push({ name: "success" });
+      });
             }
           }
         });
@@ -222,14 +224,14 @@ export default {
     cuntDown: function(order) {
       console.log(order)
       var time =
-        new Date(order.createTime).getTime() +
+        new Date(order.createTime.replace(/-/g,"/")).getTime() +
         1 * 60 * 60 * 1000 -
         new Date().getTime();
       if (time > 0) {
         this.countdown = time;
       } else {
         //超时，订单自动取消
-        // this.cancelOrder(order.orderId);
+        this.cancelOrder(order.orderId);
       }
     },
     cancelOrder(id) {

@@ -46,7 +46,8 @@
   margin-right: 10px;
 }
 .sm_bi_cont_name button {
-  width: 66px;
+   /* width: 70px;  */
+  line-height: 24px;
   float: right;
   margin-top: 5px;
   color: #13227a;
@@ -54,6 +55,7 @@
   outline: none;
   border-radius: 50px;
   background: #ffffff;
+  padding:2px 8px;
 }
 .sm_bi_cont_time {
   width: 100%;
@@ -333,14 +335,15 @@
   right: 0;
   z-index: 10;
   font-size: 14px;
-  /*background: red;
+  line-height: 1;
+
+  /* background: red;
   color: #ffffff;
   border-radius: 50%;
   width: 20px;
   height: 20px;
-  line-height: 20px;
   margin-top: -20px;
-  margin-right: 5px;*/
+  margin-right: 5px; */
 }
 .sm_si_price {
   width: calc(40% - 5px);
@@ -373,10 +376,10 @@
   background: #ee620b;
 }
 .sm_shopcarts_panel {
-  position: absolute;
-  bottom: 0;
+  position: fixed;
+  bottom: 45px;
   /* left: 0; */
-  margin-bottom: 45px;
+  /* margin-bottom: 45px; */
   height: 50%;
   width: 100%;
 }
@@ -445,12 +448,13 @@
   line-height: 26px;
 }
 .sm_spp_panel_data {
-  font-size: 11px;
+  font-size: 12px;
   height: 26px;
   line-height: 26px;
   width: 100%;
   padding: 0 10px 0 10px;
   background: #f7f7f7;
+  box-sizing: border-box;
 }
 .sm_spp_panel_list {
   height: calc(50vh - 26px - 26px - 23px);
@@ -469,7 +473,8 @@
   border-radius: 5px;
   margin-top: 10px;
   display: inline-block;
-  padding: 0.18775px 0.93775px 0 0.93775px;
+  padding:0 8px;
+  /* padding: 0.18775px 0.93775px 0 0.93775px; */
 }
 .sm_spp_pl_item {
   width: 100%;
@@ -726,7 +731,7 @@
 }
 .sm_shopList_overlayCont_close_img {
   width: 28px;
-  margin-top: 3.1275px;
+  margin-top: 20px;
 }
 .sm_sti_overlay_cont {
   display: flex;
@@ -751,7 +756,7 @@
 }
 .sm_sti_overlay_contM_close_img {
   width: 28px;
-  margin-top: 3.1275px;
+  margin-top: 20px;
 }
 .sm_sti_overlay_contM_item_title {
   width: 100%;
@@ -777,7 +782,7 @@
   height: calc(40vh - 40px - 10px);
   width: 100%;
   overflow: hidden;
-  overflow-y: auto;
+  overflow-y: auto; 
 }
 .sm_sti_overlay_contM_item_list_item {
   width: 100%;
@@ -798,7 +803,7 @@
 }
 .sm_ov_nutri_panel_panel {
   width: 100%;
-  height: 48vh;
+  /* height: 48vh; */
   background-color: #fff;
 }
 .sm_ov_nutri_panel_close {
@@ -808,7 +813,7 @@
 }
 .sm_ov_nutri_panel_close img {
   width: 28px;
-  margin-top: 2.81275px;
+  margin-top: 20px;
 }
 .sm_ov_nutri_panel_panel_title {
   width: 100%;
@@ -820,7 +825,8 @@
 }
 .sm_ov_nppp {
   width: 80%;
-  height: calc(48vh - 56px);
+  padding-bottom: 20px;
+  /* height: calc(48vh - 56px); */
   border-top: 1px solid #efefef;
   color: #2d2d2d;
   font-size: 15px;
