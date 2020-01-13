@@ -38,12 +38,12 @@ Vue.use(Router)
 export default new Router({
   mode: "history",
   routes: [
-    // {
-    //   path:'/',
-    //   redirect:'Sindex'
-    // },
     {
-      path: '/',
+      path:'/',
+      redirect:'Sindex'
+    },
+    {
+      path: '/sindex',
       name: 'Sindex',
       component: Sindex,
       meta: { title: '职工订餐'}

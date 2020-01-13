@@ -71,7 +71,7 @@ export default {
   },
   // 自执行
   created: function() {
-    this.$store.commit("RECORD_OPENID", 'ocWCVwjK_kseL-qYB83YuQYk6l3Q');
+    // this.$store.commit("RECORD_OPENID", null);
     // window.localStorage.removeItem("openid")
     // window.localStorage.setItem("openid", "o1ixfwI3WBM1zq91r_Rh7vvcJj-s");
     // window.localStorage.setItem("openid", "oMrcc5A7etjdfb9ClHbNJ97d0UVM");
