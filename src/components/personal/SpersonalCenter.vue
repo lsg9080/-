@@ -81,6 +81,7 @@ export default {
       bindingDelete()
         .then(res => {
           if (res.result === "0") {
+            this.$store.commit("RECORD_OPENID", null);
             this.$toast({
               message: res.data.note,
               forbidClick: true,

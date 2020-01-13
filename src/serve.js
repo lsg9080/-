@@ -3,15 +3,13 @@ import { request, axiosByJson,o_axiosByJson } from './https'
 // import fetch from './common/js/fetch'
 
 // http://yydc.qiluhospital.com/patientOrdering.api/api/Patient/GetOpenid
-export const getOpenid = (authCode, opencode, pageURL = "/Sindex") => request('api/StaffOrder/GetOpenid', {
+export const getOpenid = (authCode, opencode, pageURL = "/") => request('api/StaffOrder/GetOpenid', {
     authCode: authCode,
     code: opencode,
     pageURL
 });
 
 export const getStaffInfo = () => request('api/StaffOrder/GetStaffInfo', {});
-
-
 
 //绑定
 export const bindingStaff = (params) => request('api/StaffOrder/BindingStaff', { ...params });
@@ -80,11 +78,10 @@ export const orderPaid = (orderId) => request('api/StaffOrder/OrderPaid', {
 
 
 // json提交
-// export const getPrepayid = (params) => request('api/StaffOrder/GetPrepayid', { ...params });
 export const getPrepayid = (params) => axiosByJson('api/StaffOrder/GetPrepayid', { ...params });
-export const submitOrder = (params) => axiosByJson('/api/StaffOrder/SubmitOrder', { ...params });
+export const submitOrder = (params) => axiosByJson('api/StaffOrder/SubmitOrder', { ...params });
 // 获取订单列表
-export const getOrderList = (pageSize, pageNum) => o_axiosByJson('/api/StaffOrder/GetOrderList', {
+export const getOrderList = (pageSize, pageNum) => o_axiosByJson('api/StaffOrder/GetOrderList', {
     'authCode': '101FCC56AB9147F69E75AC7AAC52D2BB',
     pageSize,
     pageNum

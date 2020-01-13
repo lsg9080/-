@@ -8,7 +8,8 @@ import wx from 'weixin-js-sdk'
 export default {
 	WxConfig(data) {
 		wx.config({
-			debug: process.env.NODE_ENV == 'production' ? false : true,//这里一般在测试阶段先用true，等打包给后台的时候就改回false,
+			debug:true,
+			// debug: process.env.NODE_ENV == 'production' ? false : true,//这里一般在测试阶段先用true，等打包给后台的时候就改回false,
 			appId: data.appId,
 			timestamp: data.timeStamp,
 			nonceStr: data.nonceStr,

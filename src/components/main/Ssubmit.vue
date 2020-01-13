@@ -90,11 +90,12 @@
 
 <script>
 import {
-  // submitOrder,
+  submitOrder,
   getAddressList,
   getPaymentList,
   getStaffInfo,
   getPrepayid
+  // getPrepayid2
 } from "@/serve";
 import payUtils from "@/common/js/wechat";
 import { encryptDes } from "@/common/js/utils";
@@ -143,6 +144,7 @@ export default {
   },
   // 自执行
   created: function() {
+    // this.$router.push({ name: "success" });
     vm = this;
     // 获取商品信息
     this.ss_menuList = this.menuList;
@@ -402,7 +404,7 @@ export default {
         authCode: "101FCC56AB9147F69E75AC7AAC52D2BB",
         weixinNo: this.openid,
         shopId: this.ss_shopid,
-       
+
         districtId: this.ss_distri_id,
         districtName: this.ss_distri_name,
         buildingId: this.ss_build_id,
@@ -423,7 +425,7 @@ export default {
         tempOrder: tempOrder, // 2：临时订单(微信支付), 1 正常订单
         orderCode: "", // 微信支付必传
 
-         cookbookId: window.localStorage.getItem("cookbookId"),
+        cookbookId: window.localStorage.getItem("cookbookId")
       };
 
       console.log(params);
@@ -456,25 +458,15 @@ export default {
     // 到付
     arrivePay(params) {
       console.log(params);
-      this.$axios({
-        method: "POST",
-        url: "/api/api/StaffOrder/SubmitOrder",
-        data: params,
-        transformRequest: [
-          function(data) {
-            return JSON.stringify(data);
-          }
-        ],
-        headers: { "Content-Type": "application/json" }
-      }).then(res => {
+      submitOrder(params).then(res => {
         console.log(res);
-        if (res.data.result == "0") {
+        if (res.result == "0") {
           this.$toast("订单提交成功");
           setTimeout(() => {
             this.$router.replace({ name: "Sorder" });
           }, 1000);
         } else {
-          this.$toast(res.data.msg);
+          this.$toast(res.msg);
         }
       });
     },
@@ -482,24 +474,15 @@ export default {
     empCarPay() {
       var $this = this;
       let params = $this.ss_submitPram;
-      this.$axios({
-        method: "POST",
-        url: "/api/api/StaffOrder/SubmitOrder",
-        data: params,
-        transformRequest: [
-          function(data) {
-            return JSON.stringify(data);
-          }
-        ],
-        headers: { "Content-Type": "application/json" }
-      }).then(res => {
-        if (res.data.result == "0") {
+
+      submitOrder(params).then(res => {
+        if (res.result == "0") {
           this.$toast("订单提交成功");
           setTimeout(() => {
             this.$router.replace({ name: "Sorder" });
           }, 1000);
         } else {
-          this.$toast(res.data.msg);
+          this.$toast(res.msg);
         }
       });
     },
@@ -529,7 +512,7 @@ export default {
       var orderCode = "oc" + randomstr;
       var payId = "pi" + orderCode;
       let options = {
-        authCode: "101FCC56AB9147F69E75AC7AAC52D2BB", //authCode,
+        authCode: "101FCC56AB9147F69E75AC7AAC52D2BB",
         callFrom: "wincome",
         appId: wechatAppId,
         body: body,
@@ -539,23 +522,19 @@ export default {
         amountEncrypt: amountEncrypt
       };
 
-      console.log({
-        payId: payId,
-        orderCode: orderCode
-      });
-
       getPrepayid(options)
         .then(res => {
           if (res.result == "0") {
             let wxOptions = {
               appId: res.appId,
               nonceStr: res.nonceStr,
-              orderCode: res.orderCode,
               package: res.package,
-              payId: res.payId,
               paySign: res.paySign,
               prepay_id: res.prepay_id,
-              timeStamp:res.timeStamp
+              timeStamp: res.timeStamp,
+
+              orderCode: orderCode,
+              payId: payId
             };
             if (res.prepay_id) {
               this.wechatSubmit(params, wxOptions);
@@ -575,68 +554,7 @@ export default {
         });
     },
     wechatSubmit(params, wxOptions) {
-      /* params = {
-        address: "",
-        authCode: "101FCC56AB9147F69E75AC7AAC52D2BB",
-        buildingId: 11,
-        buildingName: "南区",
-        cookbookId: 5,
-        deliveryTime: "10:02",
-        deptId: 1,
-        deptName: "科1",
-        districtId: 5,
-        districtName: "南京东路",
-        floorId: 25,
-        floorName: "2",
-        menuList: [
-          {
-            cookbookDetailId: 252,
-            kindOf: "",
-            menuCode: "W000024",
-            menuName: "矿泉水",
-            menuSortId: 3,
-            foodIds: "169009",
-            foodNames: "矿泉水(康师傅牌)",
-            foodDosages: "250.00",
-            price: 0.01,
-            remainingNum: 98,
-            energy: 0,
-            protein: 0,
-            fat: 0,
-            carbohydr: 0,
-            maxQuantity: 98,
-            picture:
-              "http://demostaffapi.wincome.group/Upload/WaresImg/ec046c8255d4437b9bcb2c6228361e82_24.jpg?number=0.710256625297599",
-            IMG: null,
-            sortId: 0,
-            hasNutrient: 0,
-            Explain: null,
-            repastId: 43,
-            repastName: "夜宵",
-            menuTypeId: 43,
-            menuTypeName: "热销",
-            menuTypeSortId: 1
-          }
-        ],
-        mobile: "18226639080",
-        note: "",
-        orderCode: "",
-        orderDate: "2020-01-10",
-        paymentId: 2,
-        repastList: [
-          {
-            repastId: 43,
-            OrderId: 0,
-            repastName: "夜宵",
-            amount: 0.01,
-            SortId: 1
-          },
-          { repastId: 56, OrderId: 0, repastName: "午餐", amount: 3, SortId: 2 }
-        ],
-        shopId: "12",
-        tempOrder: 1,
-        weixinNo: "061YHzgc0z9tly19RMgc0sTxgc0YHzgG"
-      };*/
+      console.log(params);
       let options = {
         deliveryTime: formatDate(new Date(), "hh:ss"),
         payId: wxOptions.payId,
@@ -644,24 +562,16 @@ export default {
         tradeId: "",
         tempOrder: 2
       };
-      Object.assign({ params, options });
 
-      this.$axios({
-        method: "POST",
-        url: "/api/api/StaffOrder/SubmitOrder",
-        data: params,
-        transformRequest: [
-          function(data) {
-            return JSON.stringify(data);
-          }
-        ],
-        headers: { "Content-Type": "application/json" }
-      })
+      Object.assign(params,options );
+
+
+      submitOrder(params)
         .then(res => {
-          if (res.data.result != "0") {
+          if (res.result == "0") {
             this.wechatPaySDK(wxOptions);
           } else {
-            this.$toast(res.data.msg);
+            this.$toast(res.msg);
           }
         })
         .catch(err => {
@@ -686,6 +596,7 @@ orderCode: "WX202001101836187653"
       console.log(wxOptions, opt);
       Object.assign(wxOptions, opt);
       console.log("从后端取到的微信参数：" + JSON.stringify(wxOptions));
+
       payUtils.WXJSApi(wxOptions, () => {
         this.$router.push({ name: "success" });
       });

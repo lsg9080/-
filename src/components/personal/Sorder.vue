@@ -108,6 +108,7 @@ export default {
 
       getOrderList(this.pageSize, this.pageNum)
         .then(res => {
+          console.log(res.data);
           if (res.data.result === "0") {
             if (res.data.data.length == 0) {
               // 数据全部加载完成

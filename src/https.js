@@ -64,7 +64,7 @@ function request(url = url, data = {}, method = 'post', headers = {}) {
   })
 }
 
-console.log(store.getters.openid)
+
 function axiosByJson(url = url, data = {}, method = 'post') {
   let defaultOpstion = { weixinNo: store.getters.openid };
   Object.assign(data, defaultOpstion);
@@ -73,7 +73,7 @@ function axiosByJson(url = url, data = {}, method = 'post') {
     axios({
       changeOrigin: true,
       method: method,
-      baseURL:process.env.NODE_ENV == 'production'?baseURL:'/api',
+      baseURL: baseURL,
       url: url,
       data: data,
     })
@@ -95,7 +95,7 @@ function o_axiosByJson(url = url, data = {}, method = 'post') {
     axios({
       changeOrigin: true,
       method: method,
-      baseURL:process.env.NODE_ENV == 'production'?baseURL:'/api',
+      baseURL:baseURL,
       url: url,
       data: data,
     })

@@ -30,6 +30,8 @@ Vue.prototype.$axios = axios
 // Vue.prototype.baseURL = baseURL
 Vue.prototype.$defaultUrl = defaultUrl
 // Vue.prototype.request = request
+import vConsole from 'vconsole'
+Vue.prototype.$vConsole = new vConsole()
 
 
 Vue.config.productionTip = false
