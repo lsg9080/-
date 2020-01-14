@@ -84,11 +84,12 @@ export default {
     getInfo() {
       getStaffInfo()
         .then(res => {
-          let data = res.data;
-          this.sex = data.sex;
-          this.age = data.age;
-          this.weight = data.weight;
-          this.height = data.height;
+          console.log(res)
+          // let data = res.data;
+          // this.sex = data.sex;
+          // this.age = data.age;
+          // this.weight = data.weight;
+          // this.height = data.height;
         })
         .catch(err => {
           console.log(err);

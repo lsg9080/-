@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-import Sindex from '@/components/Sindex'
+/*import Sindex from '@/components/Sindex'
 import Slogin from '@/components/personal/Slogin'
 import SpersonalCenter from '@/components/personal/SpersonalCenter'
 import Srecomm from '@/components/personal/Srecomm'
@@ -16,21 +16,25 @@ import Sorder from '@/components/personal/Sorder'
 import OrderDetail from '@/components/personal/OrderDetail'
 import Recharge from '@/components/Recharge'
 import RechargeCallback from '@/components/RechargeCallback'
+import OrderCallback from '@/components/personal/OrderCallback'*/
 
 
-// const Sindex = () => import(/* webpackChunkName: "Sindex" */ '@/components/Sindex')
-// const Slogin = () => import(/* webpackChunkName: "Slogin" */ '@/components/personal/Slogin')
-// const SpersonalCenter = () => import(/* webpackChunkName: "SpersonalCenter" */ '@/components/personal/SpersonalCenter')
-// const Srecomm = () => import(/* webpackChunkName: "Srecomm" */ '@/components/personal/Srecomm')
-// const SrecommNutri = () => import(/* webpackChunkName: "SrecommNutri" */ '@/components/personal/SrecommNutri')
-// const Smeals = () => import(/* webpackChunkName: "Smeals" */ '@/components/main/shopItem')
-// const Smarket = () => import(/* webpackChunkName: "Smarket" */ '@/components/main/Smarket')
-// const Ssubmit = () => import(/* webpackChunkName: "Ssubmit" */ '@/components/main/Ssubmit')
-// const Sdistri = () => import(/* webpackChunkName: "Sdistri" */ '@/components/main/Sdistri')
-// const Ssubmitnote = () => import(/* webpackChunkName: "Ssubmitnote" */ '@/components/main/Ssubmitnote')
-// const Sorder = () => import(/* webpackChunkName: "Sorder" */ '@/components/personal/Sorder')
-// const OrderDetail = () => import(/* webpackChunkName: "OrderDetail" */ '@/components/personal/OrderDetail')
-// const Recharge = () => import(/* webpackChunkName: "Recharge" */ '@/components/Recharge')
+
+const Sindex = () => import(/* webpackChunkName: "Sindex" */ '@/components/Sindex')
+const Slogin = () => import(/* webpackChunkName: "Slogin" */ '@/components/personal/Slogin')
+const SpersonalCenter = () => import(/* webpackChunkName: "SpersonalCenter" */ '@/components/personal/SpersonalCenter')
+const Srecomm = () => import(/* webpackChunkName: "Srecomm" */ '@/components/personal/Srecomm')
+const SrecommNutri = () => import(/* webpackChunkName: "SrecommNutri" */ '@/components/personal/SrecommNutri')
+const Smeals = () => import(/* webpackChunkName: "Smeals" */ '@/components/main/shopItem')
+const Smarket = () => import(/* webpackChunkName: "Smarket" */ '@/components/main/Smarket')
+const Ssubmit = () => import(/* webpackChunkName: "Ssubmit" */ '@/components/main/Ssubmit')
+const Sdistri = () => import(/* webpackChunkName: "Sdistri" */ '@/components/main/Sdistri')
+const Ssubmitnote = () => import(/* webpackChunkName: "Ssubmitnote" */ '@/components/main/Ssubmitnote')
+const Sorder = () => import(/* webpackChunkName: "Sorder" */ '@/components/personal/Sorder')
+const OrderDetail = () => import(/* webpackChunkName: "OrderDetail" */ '@/components/personal/OrderDetail')
+const Recharge = () => import(/* webpackChunkName: "Recharge" */ '@/components/Recharge')
+const RechargeCallback = () => import(/* webpackChunkName: "RechargeCallback" */ '@/components/RechargeCallback')
+const OrderCallback = () => import(/* webpackChunkName: "OrderCallback" */ '@/components/personal/OrderCallback')
 
 
 Vue.use(Router)
@@ -114,6 +118,13 @@ export default new Router({
       component: OrderDetail,
       meta: { title: '订单详情' }
     },
+    {
+      path: '/orderCallback',
+      name: 'OrderCallback',
+      component: OrderCallback,
+      meta: { title: '订单详情' }
+    },
+    
     {
       path: '/recharge',
       name: 'Recharge',

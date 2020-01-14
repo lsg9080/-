@@ -2,11 +2,11 @@
   <div>
     <div class="rccb_status">
       <img v-if="this.$route.query.status=='ok'" src="../assets/face_happy.png" />
-      <img v-else src="../assets/face_unhappy.png"/>
+      <img v-else src="../assets/face_unhappy.png" />
       <div class="rccb_status_title">{{payStatus}}</div>
       <div v-if="paytitle" class="rccb_status_retitle">{{paytitle}}</div>
       <div v-if="price" class="rccb_status_money">{{price}}</div>
-      <button class="rccb_status_btn user-testBtn" type="primary" bindtap="confirm_jump">确定</button>
+      <van-button type="primary" @click="confirm" class="rccb_status_btn user-testBtn">确定</van-button>
     </div>
   </div>
 </template>
@@ -16,20 +16,25 @@ export default {
   data() {
     return {
       payStatus: "", // 充值状态
-      paytitle:"", 
-      price:0
+      paytitle: "",
+      price: 0
     };
   },
   created() {
     if (this.$route.query.status == "ok") {
-        
-        this.price= "¥" + (this.$route.query.price / 1).toFixed(2)
-        this.payStatus= "支付成功"
-        this.paytitle= "充值金额"
+      this.price = "¥" + (this.$route.query.price / 1).toFixed(2);
+      this.payStatus = "支付成功";
+      this.paytitle = "充值金额";
     } else {
-
-        this.payStatus= "支付失败"
-    
+      this.payStatus = "支付失败";
+    }
+  },
+  methods: {
+    confirm() {
+      this.$router.push({
+        name: "Recharge"
+      });
+      console.log(1);
     }
   }
 };
@@ -57,7 +62,8 @@ export default {
 
 .rccb_status_retitle {
   font-size: 18px;
-  margin-top: 20vh;
+  margin-top: 10vh;
+  margin-bottom: 2vh;
   width: 100%;
   text-align: center;
 }

@@ -10,14 +10,14 @@
           <div class="sm_bi_cont_name">
             <label>{{sm_shopInfo.shopName}}</label>
             <!-- <van-button plain hairline round color="#13227a" size="small">换超市</van-button> -->
-            <button @click="sm_switchShopInfo">换超市</button>
+            <button @click="sm_shopList_overlay=true">换超市</button>
             <img
               v-if="sm_shopInfo.contact"
               src="../../assets/Smain/callphone.png"
               @click="callPhone"
             />
           </div>
-          <!-- <div v-if="idx!=null" class="sm_bi_cont_time" @click="sm_bi_contTime">
+          <!-- <div v-if="currShopId!=null" class="sm_bi_cont_time" @click="sm_bi_contTime">
           <label>服务时间</label>
           {{sm_shop_serverTime}}
           </div>-->
@@ -46,32 +46,39 @@
       </div>
     </section>
     <!-- food info -->
-    <cube-scroll ref="scroll" :options="options" :scroll-events="['scroll']">
-      <div class="sm_fi">
-        <div v-if="isClosed">
-          <div class="so_empty">
-            <img src="../../assets/empty.png" />
-            <div>当前餐厅已过服务时间</div>
-          </div>
+    <!-- <cube-scroll ref="scroll" :options="options" :scroll-events="['scroll']"> -->
+    <div class="sm_fi">
+      <div v-if="isClosed">
+        <div class="so_empty">
+          <img src="../../assets/empty.png" />
+          <div>当前餐厅已过服务时间</div>
         </div>
-        <shop-panel
-          v-else
-          :menuList="sm_temp_menuTypeList"
-          :goodsList="sm_fi_menulist"
-          :currRepastId="currRepastId"
-          :showDesc="true"
-          @check-nutrient="sm_fi_menu_nutri"
-          @add-cart="sm_panel_add"
-          @remove-cart="sm_panel_reduce"
-        ></shop-panel>
       </div>
-    </cube-scroll>
+      <div v-else-if="currMenuTypeId==-1&&sm_temp_menuTypeList.length==0">
+        <div class="so_empty">
+          <img src="../../assets/empty.png" />
+          <div>当前餐次未配置</div>
+        </div>
+      </div>
+      <shop-panel
+        ref="panel"
+        v-else-if="sm_fi_menulist.length"
+        :menuList="sm_temp_menuTypeList"
+        :goodsList="sm_fi_menulist"
+        :currRepastId="currRepastId"
+        :showDesc="false"
+        @check-nutrient="sm_fi_menu_nutri"
+        @add-cart="sm_panel_add"
+        @remove-cart="sm_panel_reduce"
+      ></shop-panel>
+    </div>
+    <!-- </cube-scroll> -->
     <!-- :height="pa" -->
     <!-- nutri program -->
     <div class="sm_np">
       <div class="sm_np_pro" :style="{'width': sm_totalPogress_pre}"></div>
     </div>
-     <!-- submit info -->
+    <!-- submit info -->
     <div class="sm_si">
       <div class="sm_si_icon" @click="sm_shopcarts_oc">
         <div class="cart_icon">
@@ -124,11 +131,26 @@
                 >
                   <div class="sm_spp_pl_item_name">{{item.menuName}}</div>
                   <div class="sm_spp_pl_item_num">¥{{item.price}}</div>
-                  <div class="sm_spp_pl_item_price">
+                  <div class="">
+                    <label
+                      class="sm_fi_list_mirpr_add"
+                      @click.self.stop="sm_panel_add(item.id)"
+                      v-if="item.remainingNum - item.num > 0"
+                    >+</label>
+                    <label class="sm_fi_list_mirpr_add_Dis" v-else>+</label>
+                    <label class="sm_fi_list_mirpr_num" v-if="item.num > 0">{{item.num}}</label>
+                    <label
+                      class="sm_fi_list_mirpr_reduce"
+                      @click.self.stop="sm_panel_reduce(item.id)"
+                      v-if="item.num > 0"
+                    >-</label>
+                    <div class="clearboth"></div>
+                  </div>
+                  <!-- <div class="sm_spp_pl_item_price">
                     <div class="sm_spp_pl_item_price_reduce" @click="sm_panel_reduce(item.id)">-</div>
                     <div class="sm_spp_pl_item_price_num">{{item.num}}</div>
                     <div class="sm_spp_pl_item_price_add" @click="sm_panel_add(item.id)">+</div>
-                  </div>
+                  </div> -->
                   <div class="clearboth"></div>
                   <!-- ×{{item.num}} -->
                 </div>
@@ -146,13 +168,13 @@
             <div class="sm_shopList_overlayCont_shoplist_title">请选择餐厅</div>
             <div class="sm_shopList_overlayCont_shoplist_cont">
               <div
-                @click="sm_switchShop(index,item.shopId)"
-                :class="[{'sm_slolcslc_itemS':idx==item.shopId},'sm_slolcslc_item']"
+                @click="sm_switchShopId(index,item.shopId)"
+                :class="[{'sm_slolcslc_itemS':switchShopId==item.shopId},'sm_slolcslc_item']"
                 v-for="(item, index) in sm_shopList"
                 :key="item.shopId"
               >
                 <label class="sm_slolcslc_item_img">
-                  <img :src="sm_shopList_choose" v-show="idx==item.shopId" />
+                  <img :src="sm_shopList_choose" v-show="switchShopId==item.shopId" />
                 </label>
                 <label class="sm_slolcslc_item_name">{{item.shopName}}</label>
               </div>
@@ -254,7 +276,7 @@
 
 <script>
 import { getMenuList, getRepastList, getShopList } from "@/serve";
-import { mapState } from 'vuex';
+import { mapState } from "vuex";
 let vm;
 export default {
   data() {
@@ -265,7 +287,8 @@ export default {
       sm_shopList_close: require("../../assets/Smain/close.png"),
       sm_shop_phone: require("../../assets/Smain/callphone.png"),
       sm_shop_choose_id: "",
-      idx: null,
+      currShopId: null,
+      switchShopId: null,
       sm_shopInfo: {}, // 商家信息
       sm_shop_select_time: "", // 当前时间
       sm_shop_select_repast: [], // 当前时间餐次数组
@@ -277,8 +300,7 @@ export default {
       currRepastId: "", // 当前餐次id
       sm_fi_menulist: [], // 菜谱数据
       sm_temp_menuTypeList: [], // 临时存放菜谱类型数据数组
-      sm_temp_menuTypeList_id: "", // 当前菜谱类别id
-      sm_temp_menuTypeList_idx: "",
+      currMenuTypeId: "", // 当前菜谱类别id
       sm_si_shop_icon: require("../../assets/Smain/shopCar.png"),
       sm_si_shop_iconDis: require("../../assets/Smain/shopCar1.png"),
       sm_si_shop_num: 0, // 选中的菜谱总数
@@ -309,17 +331,17 @@ export default {
   // 自执行
   created: function() {
     vm = this;
- console.log(this.$store.state)
+    console.log(this.$store.state);
     this.sm_totalPogress = parseFloat(
       window.localStorage.getItem("energy"),
       10
     );
     // 获取上一次选择商家的id
     var CurShopId = this.supermarketId;
-    if (CurShopId === null || CurShopId ===undefined ||CurShopId ==='') {
-      this.idx = "";
+    if (CurShopId === null || CurShopId === undefined || CurShopId === "") {
+      this.currShopId = "";
     } else {
-      this.idx = CurShopId;
+      this.currShopId = CurShopId;
       this.sm_shopList_overlay = false;
     }
     // 获取商家列表
@@ -365,9 +387,11 @@ export default {
               chooseSId === undefined ||
               chooseSId === ""
             ) {
-              $this.idx = list[0].shopId;
+              $this.currShopId = list[0].shopId;
+              this.switchShopId = list[0].shopId;
             } else {
-              $this.idx = chooseSId;
+              $this.currShopId = chooseSId;
+              this.switchShopId = chooseSId;
               for (var j = 0; j < list.length; j++) {
                 if (JSON.stringify(list[j].shopId) == chooseSId) {
                   $this.sm_shopInfo = list[j];
@@ -381,7 +405,7 @@ export default {
                 }
               }
             }
-           
+
             //
           } else {
             $this.$toast({
@@ -396,28 +420,30 @@ export default {
         });
     },
     // 选择商家
-    sm_switchShop(index, id) {
+    sm_switchShopId(index, id) {
       console.log(index + "+" + id);
-      this.idx = id;
+      this.switchShopId = id;
     },
     // 确定选择的商家
     sm_chooseShop() {
-      console.log(this.idx);
-      this.$store.commit("RECORD_SUPERMARKET_ID",this.idx)
+      this.currShopId = this.switchShopId;
+      this.$store.commit("RECORD_SUPERMARKET_ID", this.currShopId);
       this.sm_shopList_overlay = false;
-      for (var i = 0; i < this.sm_shopList.length; i++) {
-        if (this.sm_shopList[i].shopId === this.idx) {
-          this.sm_shopInfo = this.sm_shopList[i];
+      this.sm_shopList.forEach(item => {
+        if (item.shopId === this.currShopId) {
+          this.sm_shopInfo = item;
+          this.sm_shop_select_time = item.dateList[0].orderDate;
         }
-      }
-      this.sm_shop_select_time = this.sm_shopInfo.dateList[0].orderDate;
+      });
       this.sm_shopRepastInfo();
       this.sm_si_shop_num = 0;
       this.sm_si_shop_price = 0;
+      this.sm_totalPogress_pre = "0%";
     },
     // 关闭选择的商家
     sm_chooseShop_close() {
       this.sm_shopList_overlay = false;
+      this.switchShopId = this.currShopId;
     },
     // 查看服务时间
     sm_bi_contTime() {
@@ -467,7 +493,7 @@ export default {
               // 加载默认餐次
               this.currRepastId = res.data[0].repastId;
               // 加载菜谱数据
-              this.sm_getMenuList();
+              this.getShopMenuList();
               this.isClosed = false;
             } else {
               this.isClosed = true;
@@ -486,10 +512,7 @@ export default {
           console.log(err);
         });
     },
-    // 换餐厅
-    sm_switchShopInfo() {
-      this.sm_shopList_overlay = true;
-    },
+
     // 切换订餐日期
     sm_stiReserve() {
       var $this = this;
@@ -525,31 +548,25 @@ export default {
     // 切换餐次
     sm_ri_itemSelect(repastId) {
       this.currRepastId = repastId;
-      // this.sm_getMeal()
       this.menuListDeal();
     },
     // 获取菜谱数据
-    sm_getMenuList() {
-      // currRepastId
-      // sm_shop_select_time
-      // sm_shopInfo
-      var $this = this;
-      console.log(this.sm_shopInfo);
-      console.log(this.sm_shop_select_time);
+    getShopMenuList() {
       getMenuList(this.sm_shopInfo.shopId, this.sm_shop_select_time)
         .then(res => {
           if (res.result === "0") {
-            //
-            window.localStorage.setItem("cookbookId", res.data.cookbookId);
-            for (var i = 0; i < res.data.menuList.length; i++) {
-              res.data.menuList[i].num = 0;
-              res.data.menuList[i].id = i + 1;
+            let data = res.data;
+            window.localStorage.setItem("cookbookId", data.cookbookId);
+            for (var i = 0; i < data.menuList.length; i++) {
+              data.menuList[i].num = 0;
+              data.menuList[i].id = i + 1;
             }
-            $this.sm_fi_menulist = res.data.menuList;
-            $this.menuListDeal();
-            //
+            this.sm_fi_menulist = data.menuList;
+            this.menuListDeal();
           } else {
-            $this.$toast({
+            this.sm_temp_menuTypeList = [];
+            this.currMenuTypeId = -1;
+            this.$toast({
               message: res.msg,
               forbidClick: true,
               duration: 3000
@@ -562,56 +579,33 @@ export default {
     },
     // 处理菜谱数据
     menuListDeal() {
-      // this.sm_fi_menulist
-      console.log(this.sm_fi_menulist);
-      // currRepastId当前餐次
-      var temp = [];
-      for (var i = 0; i < this.sm_fi_menulist.length; i++) {
-        if (this.sm_fi_menulist[i].repastId === this.currRepastId) {
-          temp.push(this.sm_fi_menulist[i]);
-        }
+      // 当前餐次下的所有菜品
+      let currRepastMenu = this.sm_fi_menulist.filter(
+        item => item.repastId === this.currRepastId
+      );
+      // 当前餐次下无菜品时，不做后续操作
+      if (!currRepastMenu.length) {
+        this.sm_temp_menuTypeList = [];
+        this.currMenuTypeId = -1;
+        return;
       }
-      console.log(temp);
-      var menuListTypeUn = [];
-      for (var j = 0; j < temp.length; j++) {
-        menuListTypeUn.push({
-          menuTypeName: temp[j].menuTypeName,
-          menuTypeId: temp[j].menuTypeId
-        });
-      }
-      console.log(menuListTypeUn);
-      //
-      // 剔除数组中重复数组
-      var uniques = [];
-      var stringify = {};
-      for (var s = 0; s < menuListTypeUn.length; s++) {
-        var keys = Object.keys(menuListTypeUn[s]);
-        keys.sort(function(a, b) {
-          return Number(a) - Number(b);
-        });
-        var str = "";
-        for (var t = 0; t < keys.length; t++) {
-          str += JSON.stringify(keys[t]);
-          str += JSON.stringify(menuListTypeUn[s][keys[t]]);
-        }
-        if (!stringify.hasOwnProperty(str)) {
-          uniques.push(menuListTypeUn[s]);
-          stringify[str] = true;
-        }
-      }
-      // uniques = uniques
-      this.sm_temp_menuTypeList = uniques; // 品类数组(已处理)(剔除重复数据)
-      console.log(this.sm_temp_menuTypeList);
-      this.sm_temp_menuTypeList_id = uniques[0].menuTypeId;
-      this.sm_temp_menuTypeList_idx = uniques[0].menuTypeId;
-      console.log(this.sm_temp_menuTypeList_id);
-      //
+      // 当前餐次下的菜品类型
+      let obj = {};
+      let menuTypeList = currRepastMenu.reduce((cur, next) => {
+        next = { menuTypeName: next.menuTypeName, menuTypeId: next.menuTypeId };
+        obj[next.menuTypeId]
+          ? ""
+          : (obj[next.menuTypeId] = true && cur.push(next));
+        return cur;
+      }, []); //设置cur默认类型为数组，并且初始值为空的数组
+      console.log(menuTypeList);
+
+      this.sm_temp_menuTypeList = menuTypeList;
+      this.currMenuTypeId = menuTypeList[0].menuTypeId;
     },
     // 选择不同菜谱类别
     sm_select_menuType(typeId) {
-      console.log(typeId);
-      this.sm_temp_menuTypeList_id = typeId;
-      this.sm_temp_menuTypeList_idx = typeId;
+      this.currMenuTypeId = typeId;
     },
     // 菜谱面板 添加菜谱
     sm_panel_add(id) {
@@ -728,7 +722,7 @@ export default {
         // this.sm_shop_select_time
         window.localStorage.setItem("orderDate", $this.sm_shop_select_time);
         // 去结算
-        this.$store.commit('RECORD_MENULIST',this.sm_fi_menulist)
+        this.$store.commit("RECORD_MENULIST", this.sm_fi_menulist);
         // console.log('去结算')
         this.$router.push({
           path: "/ssubmit",

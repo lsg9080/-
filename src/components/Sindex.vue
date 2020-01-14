@@ -71,14 +71,14 @@ export default {
   },
   // 自执行
   created: function() {
-    // this.$store.commit("RECORD_OPENID", null);
+    // this.$store.commit("RECORD_OPENID", "ocWCVwjK_kseL-qYB83YuQYk6l3Q");
     // window.localStorage.removeItem("openid")
     // window.localStorage.setItem("openid", "o1ixfwI3WBM1zq91r_Rh7vvcJj-s");
     // window.localStorage.setItem("openid", "oMrcc5A7etjdfb9ClHbNJ97d0UVM");
     // this.$store.commit("RECORD_OPENID", 'o1ixfwI3WBM1zq91r_Rh7vvcJj-s');
     // 获取openid
+    //  this.$store.commit("LOGOUT");
     this.staffOpenid();
-    console.log(this.$store.state);
   },
   computed: {
     ...mapState(["openid"])
@@ -107,15 +107,19 @@ export default {
           getOpenid(authCode, opencode)
             .then(data => {
               console.log(data);
-              this.$store.commit("RECORD_OPENID", data.openid);
-              console.log("openid||" + data.openid);
+              if (data.result == 0) {
+                this.$store.commit("RECORD_OPENID", data.openid);
+                console.log("openid||" + data.openid);
+              }
               this.si_overlay = false;
             })
             .catch(err => {
               console.log(err);
+              this.si_overlay = false;
             });
         }
       } else {
+        this.$store.commit("RECORD_OPENID", this.openid);
         this.si_overlay = false;
       }
     },
@@ -124,19 +128,27 @@ export default {
       if (index == 3) {
         this.employeeCard();
       } else {
-        this.getStandardNutrition(index);
+        this.getStaffInfo(index);
       }
     },
-    // 目的判断有没有登录，登录后跳转对应页面
-    getStandardNutrition(index) {
+    /**
+     * 1. 目的判断有没有登录，登录后跳转对应页面
+     * 2. 绑定后，(在线订餐、商超便利)先进行营养推荐后使用
+     */
+    getStaffInfo(index) {
       getStaffInfo()
         .then(res => {
           if (res.result === "0") {
             console.log("已经绑定过");
-            window.localStorage.setItem("energy", res.data.energy);
-            this.$router.push({
-              name: this.cells[index].route
-            });
+            if (res.data.age == 0 && (index == 0||index == 1)) {
+              this.$router.push({
+                name: "Srecomm"
+              });
+            } else {
+              this.$router.push({
+                name: this.cells[index].route
+              });
+            }
           } else {
             this.$router.push({ name: "Slogin" });
           }

@@ -17,7 +17,7 @@
         size="large"
         @click.self.stop="unBinding"
         color="#7da6d4"
-        class=" custom-btn"
+        class="custom-btn"
       >解除绑定</van-button>
     </div>
   </div>
@@ -80,15 +80,15 @@ export default {
     unBinding() {
       bindingDelete()
         .then(res => {
-          if (res.result === "0") {
-            this.$store.commit("RECORD_OPENID", null);
+          if (res.data.result == "0") {
             this.$toast({
               message: res.data.note,
               forbidClick: true,
               duration: 3000
             });
-            setTimeout(()=> {
+            setTimeout(() => {
               this.$router.replace({ path: "/" });
+              this.$store.commit("LOGOUT");
             }, 3000);
           } else {
             this.$toast({
@@ -109,11 +109,7 @@ export default {
     //
     spc_nutriRecommend() {
       this.$router.push({
-        path: "/srecomm",
         name: "Srecomm",
-        query: {
-          // from: 'mealNotice'
-        }
       });
     }
   }

@@ -37,7 +37,7 @@
 </template>  
 
 <script>
-import { getStaffInfo,getPrepayid } from "@/serve";//
+import { getStaffInfo , getPrepayid} from "@/serve"; //
 import payUtils from "@/common/js/wechat";
 import { encryptDes } from "@/common/js/utils"; //encryptionPay,
 import { wechatAppId } from "@/config/auth";
@@ -50,38 +50,19 @@ export default {
       value: null
     };
   },
-  mounted(){
-     
+  mounted() {
+     this.$router.push({
+                name: "RechargeCallback"
+              });
+              return;
   },
   created() {
-
+     
+      //  this.$router.push({
+      //       path: "/rechargeCallback",
+      //       query: { status: "ok", price: 10 }
+      //     });
     // this.initLoadStaffInfo();
-   
-    /*let a = {
-      appId: "wx63a06633c5e456bd",
-      nonceStr: "93AB00F22A76424EF52F10FBB52C8EE9",
-      orderCode: "WX202001101505001537",
-      package: "prepay_id=wx10150500354160d81d5ddafa1258109300",
-      payId: "WX20200110150500153715370247",
-      paySign: "E9D06A8CD50396E441CB8CEBE7F90424",
-      prepay_id: "wx10150500354160d81d5ddafa1258109300",
-      weixinNo: "oMrcc5A7etjdfb9ClHbNJ97d0UVM"
-    };
-    payUtils.WXJSApi(
-      a,
-      () => {
-        this.$router.push({
-          path: "/rechargeCallback",
-          query: { status: "ok", price: 0 }
-        });
-      },
-      () => {
-        this.$router.push({
-          path: "/rechargeCallback",
-          query: { status: "fail" }
-        });
-      }
-    );*/
   },
   methods: {
     initLoadStaffInfo() {
@@ -101,9 +82,6 @@ export default {
         });
     },
     formSubmit() {
-
-    
-
       var price = this.value;
 
       //判断是否填写充值金额
@@ -133,7 +111,7 @@ export default {
       //获取body
       var body = "已充值" + price + "元";
 
-      var randomstr =
+     /* var randomstr =
         (Math.random() * 10000000).toString(16).substr(0, 4) +
         "-" +
         new Date().getTime() +
@@ -142,21 +120,19 @@ export default {
           .toString()
           .substr(2, 5);
       var orderCode = "oc" + randomstr;
-      var payId = "pi" + orderCode;
+      var payId = "pi" + orderCode;*/
       let params = {
-        weixinNo: 'o1ixfwI3WBM1zq91r_Rh7vvcJj-s',
         authCode: "101FCC56AB9147F69E75AC7AAC52D2BB",
         callFrom: "wincome",
         appId: wechatAppId,
         body: body,
         callTime: callTime,
         price: price,
-        payId: payId,
+        amountEncrypt: amountEncrypt,
+        /*payId: payId,
         orderCode: orderCode,
-        paymentId: 0, //预支付充值
-        amountEncrypt: amountEncrypt
+        paymentId: 0, //预支付充值*/
       };
-
       /*let a = {
         appId: "wxdf3faecaa389c105",
         body: "已充值11.00元",
@@ -171,7 +147,7 @@ export default {
         callFrom: "wincome",
         callTime: "2020-01 - 07 13: 12: 22"
       };*/
-      console.log(params)
+    
       getPrepayid(params)
         .then(res => {
           if (res.result == "0") {
@@ -179,12 +155,9 @@ export default {
               appId: res.appId,
               nonceStr: res.nonceStr,
               package: res.package,
-              payId: res.payId,
               paySign: res.paySign,
               prepay_id: res.prepay_id,
-              timeStamp:res.timeStamp,
-
-              orderCode: res.orderCode,
+              timeStamp: res.timeStamp,
               price: params.price
             };
             if (res.prepay_id) {
@@ -223,20 +196,22 @@ export default {
       };
       Object.assign(wxOptions, opt);
       console.log("从后端取到的微信参数：" + JSON.stringify(wxOptions));
-      payUtils.WxConfig(wxOptions);     
+      payUtils.WxConfig(wxOptions);
       payUtils.WXJSApi(
         wxOptions,
         () => {
-          this.$router.push({
-            path: "/rechargeCallback",
-            query: { status: "ok", price: wxOptions.price }
-          });
+          this.$toast('充值成功')
+          // this.$router.push({
+          //   path: "/rechargeCallback",
+          //   query: { status: "ok", price: wxOptions.price }
+          // });
         },
         () => {
-          this.$router.push({
-            path: "/rechargeCallback",
-            query: { status: "fail" }
-          });
+          this.$toast('充值失败')
+          // this.$router.push({
+          //   path: "/rechargeCallback",
+          //   query: { status: "fail" }
+          // });
         }
       );
     }

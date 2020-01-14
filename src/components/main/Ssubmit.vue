@@ -57,7 +57,12 @@
         需支付
         <label>¥{{ssTotalPrice}}</label>
       </div>
-      <div class="ss_order_submit" @click="ss_submitOrder">提交订单</div>
+      <van-button
+        type="primary"
+        @click="ss_submitOrder"
+        class="ss_order_submit"
+        :disabled="disabled"
+      >提交订单</van-button>
       <div class="clearboth"></div>
     </div>
     <!-- 弹出框 -->
@@ -117,7 +122,7 @@ export default {
       ss_paymethod_list: [],
       ss_paymethod_list_chooseId: "", // 当前选择的支付方式id
       ss_paymethod_list_chooseName: "", // 当前选择的支付方式name
-      ss_distii_esc: "",
+      ss_distii_esc: "请选择配送地址",
       ss_dist_namephone: "",
       ssMenu: [], // 有效的商品
       ssRepast: [], // 有效餐次
@@ -132,7 +137,9 @@ export default {
       ss_address: "",
       ss_mobile: "",
       ss_submitPram: {},
-      ss_payMethodescpanel: ""
+      ss_payMethodescpanel: "",
+      cardId: null,
+      disabled: false
     };
   },
   computed: {
@@ -144,19 +151,17 @@ export default {
   },
   // 自执行
   created: function() {
-    // this.$router.push({ name: "success" });
     vm = this;
     // 获取商品信息
     this.ss_menuList = this.menuList;
-    // 获取支付方式
-    this.paymeth();
     // 获取地址信息
     this.getAddress();
     // 显示具体商品信息
     this.shopInfo();
     // 备注信息
     this.ss_payMethodescpanel = window.globalDataPool.note;
-
+    // 获取支付方式
+    this.paymeth();
     // 2、微信初始化
     /* if (/MicroMessenger/.test(window.navigator.userAgent)) {
       weChatConfig(window.location.href).then(res => {
@@ -174,6 +179,12 @@ export default {
       getPaymentList(this.ss_shopid)
         .then(res => {
           if (res.result === "0") {
+            if (this.cardId == null) {
+              // console.log('没有职工卡号，剔出职工卡支付');
+              res.data = res.data.filter(function(item) {
+                return item.paymentId != 1;
+              });
+            }
             $this.ss_paymethod_list = res.data;
             $this.ss_paymethod_list_chooseId = res.data[0].paymentId;
             $this.ss_paymethod_list_chooseName = res.data[0].paymentName;
@@ -233,14 +244,17 @@ export default {
         .then(res => {
           if (res.result === "0") {
             let data = res.data;
-            $this.ss_distii_esc =
-              data.districtName +
-              " " +
-              data.buildingName +
-              " " +
-              data.floorName +
-              " " +
-              (data.address ? data.address : "");
+            if (data.districtName) {
+              $this.ss_distii_esc =
+                data.districtName +
+                " " +
+                data.buildingName +
+                " " +
+                data.floorName +
+                " " +
+                (data.address ? data.address : "");
+            }
+
             $this.ss_dist_namephone = data.name + " " + data.mobile;
             $this.ss_distri_id = data.districtId;
             $this.ss_distri_name = data.districtName;
@@ -252,6 +266,7 @@ export default {
             $this.ss_mobile = data.mobile;
             this.deptId = data.deptId;
             this.deptName = data.deptName;
+            this.cardId = data.cardId;
           } else {
             $this.$toast({
               message: res.msg,
@@ -314,6 +329,7 @@ export default {
     ss_submitOrder() {
       // 先判断配送地址是否有效
       var $this = this;
+      this.disabled = true;
       getAddressList(this.ss_shopid)
         .then(res => {
           if (res.result === "0") {
@@ -369,9 +385,12 @@ export default {
               forbidClick: true,
               duration: 3000
             });
+            this.disabled = false;
           }
+         
         })
         .catch(err => {
+           this.disabled = false;
           console.log(err);
         });
     },
@@ -445,6 +464,9 @@ export default {
           } else if (this.ss_paymethod_list_chooseId === 1) {
             // 职工卡支付
             this.empCarPay(params);
+          } else if (this.ss_paymethod_list_chooseId === 6) {
+            // 一卡通支付
+            this.empCarPay(params);
           } else {
             // 到付
             this.arrivePay(params);
@@ -452,6 +474,7 @@ export default {
         })
         .catch(() => {
           // on cancel
+           this.disabled = false;
           console.log("cancel");
         });
     },
@@ -459,13 +482,14 @@ export default {
     arrivePay(params) {
       console.log(params);
       submitOrder(params).then(res => {
-        console.log(res);
         if (res.result == "0") {
           this.$toast("订单提交成功");
           setTimeout(() => {
-            this.$router.replace({ name: "Sorder" });
+            this.$router.push({ name: "OrderCallback" });
           }, 1000);
+           this.disabled = false;
         } else {
+           this.disabled = false;
           this.$toast(res.msg);
         }
       });
@@ -474,14 +498,15 @@ export default {
     empCarPay() {
       var $this = this;
       let params = $this.ss_submitPram;
-
       submitOrder(params).then(res => {
         if (res.result == "0") {
           this.$toast("订单提交成功");
           setTimeout(() => {
-            this.$router.replace({ name: "Sorder" });
+            this.$router.replace({ name: "OrderCallback" });
           }, 1000);
+           this.disabled = false;
         } else {
+           this.disabled = false;
           this.$toast(res.msg);
         }
       });
@@ -519,7 +544,10 @@ export default {
         callTime: callTime,
         price: price,
         paymentId: this.ss_paymethod_list_chooseId,
-        amountEncrypt: amountEncrypt
+        amountEncrypt: amountEncrypt,
+
+        orderCode: orderCode,
+        payId: payId
       };
 
       getPrepayid(options)
@@ -532,18 +560,28 @@ export default {
               paySign: res.paySign,
               prepay_id: res.prepay_id,
               timeStamp: res.timeStamp,
-
               orderCode: orderCode,
               payId: payId
             };
             if (res.prepay_id) {
+              let options = {
+                deliveryTime: formatDate(new Date(), "hh:ss"),
+                payId: payId,
+                orderCode: orderCode,
+                tradeId: "",
+                tempOrder: 2
+              };
+              Object.assign(params, options);
+
               this.wechatSubmit(params, wxOptions);
             }
+             this.disabled = false;
           } else {
             this.$toast({
               message: res.data.msg,
               forbidClick: true
             });
+             this.disabled = false;
           }
         })
         .catch(() => {
@@ -554,18 +592,6 @@ export default {
         });
     },
     wechatSubmit(params, wxOptions) {
-      console.log(params);
-      let options = {
-        deliveryTime: formatDate(new Date(), "hh:ss"),
-        payId: wxOptions.payId,
-        orderCode: wxOptions.orderCode,
-        tradeId: "",
-        tempOrder: 2
-      };
-
-      Object.assign(params,options );
-
-
       submitOrder(params)
         .then(res => {
           if (res.result == "0") {
@@ -597,9 +623,15 @@ orderCode: "WX202001101836187653"
       Object.assign(wxOptions, opt);
       console.log("从后端取到的微信参数：" + JSON.stringify(wxOptions));
 
-      payUtils.WXJSApi(wxOptions, () => {
-        this.$router.push({ name: "success" });
-      });
+      payUtils.WXJSApi(
+        wxOptions,
+        () => {
+          this.$router.push({ name: "OrderCallback" });
+        },
+        () => {
+          this.$toast("支付失败");
+        }
+      );
     }
   },
   activated() {

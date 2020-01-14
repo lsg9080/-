@@ -1,6 +1,7 @@
 <template>
   <div class="cube-scroll-nav" :class="{'cube-scroll-nav_side': side}">
 
+     
     <cube-sticky ref="sticky" :pos="scrollY" @change="stickyChangeHandler">
       <cube-scroll
         ref="scroll"
@@ -10,6 +11,7 @@
         @scroll="scrollHandler"
         @scroll-end="scrollEndHandler"
       >
+      
         <slot name="prepend"></slot>
         <div class="cube-scroll-nav-main">
           <cube-sticky-ele ref="navBarEle">
@@ -20,15 +22,7 @@
                 :labels="labels"
                 :current="active"
               >
-                <span slot-scope="props">
-                  {{props.txt}}
-                  <!-- <van-tag
-                    v-if="categoryNum[props.index]"
-                    type="danger"
-                    round
-                    style="position: absolute;"
-                  >{{categoryNum[props.index]}}</van-tag> -->
-                </span>
+                <span slot-scope="props">{{props.txt}}</span>
               </cube-scroll-nav-bar>
             </slot>
           </cube-sticky-ele>
@@ -71,7 +65,6 @@ export default {
   },
   // mixins: [scrollMixin],
   props: {
-  
     data: {
       type: Array
     },
@@ -86,7 +79,7 @@ export default {
     current: {
       type: [String, Number],
       default: ""
-    },
+    }
     // categoryNum: {
     //   default: []
     // }
@@ -111,22 +104,20 @@ export default {
       return this.side ? DIRECTION_V : DIRECTION_H;
     },
     options() {
-      return { click: true, bounce: false };
-    },
+      return { click: true, stopPropagation: true, bounce: false };
+    }
   },
   watch: {
     current(newVal) {
+      console.log(newVal);
       this.stickyCurrent = newVal;
       this.active = newVal;
       this.jumpTo(newVal);
+      this.refresh();
     },
     active(newVal) {
       this.$emit(EVENT_CHANGE, newVal);
-    },
- 
-    // categoryNum(newVal) {
-    //   console.log(newVal);
-    // }
+    }
   },
   created() {
     this.navBar = null;
@@ -224,7 +215,6 @@ export default {
       if (this.scrollY <= 0) {
         this.$emit("scroll0");
       }
-
     },
     scrollEndHandler() {
       this._jumping = false;

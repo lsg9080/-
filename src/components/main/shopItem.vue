@@ -46,7 +46,7 @@
         </div>
       </div>
     </section>
-    <cube-scroll ref="scroll" :options="options" :scroll-events="['scroll']">
+    <!-- <cube-scroll ref="scroll" :options="options" :scroll-events="['scroll']" :threshold="0"> -->
       <div class="sm_fi">
         <div v-if="isClosed">
           <div class="so_empty">
@@ -61,7 +61,7 @@
           </div>
         </div>
         <shop-panel
-          v-else
+          v-else-if="sm_fi_menulist.length"
           :menuList="sm_temp_menuTypeList"
           :goodsList="sm_fi_menulist"
           :currRepastId="currRepastId"
@@ -71,7 +71,7 @@
           @remove-cart="sm_panel_reduce"
         ></shop-panel>
       </div>
-    </cube-scroll>
+    <!-- </cube-scroll> -->
 
     <!-- nutri program -->
     <div class="sm_np">
@@ -129,11 +129,26 @@
                 >
                   <div class="sm_spp_pl_item_name">{{item.menuName}}</div>
                   <div class="sm_spp_pl_item_num">¥{{item.price}}</div>
-                  <div class="sm_spp_pl_item_price">
+                  <div class="">
+                    <label
+                      class="sm_fi_list_mirpr_add"
+                      @click.self.stop="sm_panel_add(item.id)"
+                      v-if="item.remainingNum - item.num > 0"
+                    >+</label>
+                    <label class="sm_fi_list_mirpr_add_Dis" v-else>+</label>
+                    <label class="sm_fi_list_mirpr_num" v-if="item.num > 0">{{item.num}}</label>
+                    <label
+                      class="sm_fi_list_mirpr_reduce"
+                      @click.self.stop="sm_panel_reduce(item.id)"
+                      v-if="item.num > 0"
+                    >-</label>
+                    <div class="clearboth"></div>
+                  </div>
+                  <!-- <div class="sm_spp_pl_item_price">
                     <div class="sm_spp_pl_item_price_reduce" @click="sm_panel_reduce(item.id)">-</div>
                     <div class="sm_spp_pl_item_price_num">{{item.num}}</div>
                     <div class="sm_spp_pl_item_price_add" @click="sm_panel_add(item.id)">+</div>
-                  </div>
+                  </div> -->
                   <div class="clearboth"></div>
                   <!-- ×{{item.num}} -->
                 </div>
@@ -203,12 +218,12 @@
             <div class="sm_shopList_overlayCont_shoplist_cont">
               <div
                 @click="switchShop(index,item.shopId)"
-                :class="[{'sm_slolcslc_itemS':currShopId==item.shopId},'sm_slolcslc_item']"
+                :class="[{'sm_slolcslc_itemS':switchShopId==item.shopId},'sm_slolcslc_item']"
                 v-for="(item, index) in sm_shopList"
                 :key="item.shopId"
               >
                 <label class="sm_slolcslc_item_img">
-                  <img src="../../assets/Smain/choose.png" v-show="currShopId==item.shopId" />
+                  <img src="../../assets/Smain/choose.png" v-show="switchShopId==item.shopId" />
                 </label>
                 <label class="sm_slolcslc_item_name">{{item.shopName}}</label>
               </div>
@@ -369,7 +384,8 @@ export default {
       sm_s_finD: "0%",
       sm_s_finZ: "0%",
       sm_s_finT: "0%",
-      isClosed: false
+      isClosed: false,
+      switchShopId:null
     };
   },
   // 自执行
@@ -391,38 +407,6 @@ export default {
     // 获取商家列表
     this.getShopList();
 
-    /*let item = {
-      cookbookDetailId: 11,
-      kindOf: "",
-      menuCode: "W000019",
-      menuName: "奥尔良烤翅",
-      menuSortId: 1,
-      foodIds: "011203",
-      foodNames: "小麦粉(特二粉)",
-      foodDosages: "100.00",
-      price: 15,
-      remainingNum: 6,
-      energy: 505.5,
-      protein: 29.1,
-      fat: 35.4,
-      carbohydr: 19.2,
-      maxQuantity: 6,
-      picture:
-        "http://demostaffapi.wincome.group/Upload/WaresImg/be00c394f58e499aa56f0ea15fdf459a_19.jpg?number=0.830479192468561",
-      IMG: null,
-      sortId: 0,
-      hasNutrient: 0,
-      Explain: null,
-      repastId: 43,
-      repastName: "夜宵",
-      menuTypeId: 33,
-      menuTypeName: "闽南菜",
-      menuTypeSortId: 2,
-      num: 1,
-      id: 1
-    };
-    this.$store.commit("ADD_CART", item);
-    */
   },
   computed: {
     ...mapState(["restaurantId"]),
@@ -443,8 +427,10 @@ export default {
             var chooseSId = this.restaurantId;
             if (chooseSId === null|| chooseSId ===undefined ||chooseSId ==='') {
               $this.currShopId = cateringShop[0].shopId;
+              this.switchShopId = cateringShop[0].shopId;
             } else {
               $this.currShopId = chooseSId;
+              this.switchShopId = chooseSId;
               cateringShop.forEach(item => {
                 if (JSON.stringify(item.shopId) == chooseSId) {
                   $this.sm_shopInfo = item;
@@ -471,10 +457,11 @@ export default {
     },
     // 选择商家
     switchShop(index, id) {
-      this.currShopId = id;
+      this.switchShopId = id;
     },
     // 确定选择的商家
     sm_chooseShop() {
+      this.currShopId = this.switchShopId;
       this.$store.commit("RECORD_RESTAURANT_ID", this.currShopId);
       this.sm_shopList_overlay = false;
       this.sm_shopList.forEach(item => {
@@ -491,6 +478,7 @@ export default {
     // 关闭选择的商家
     sm_chooseShop_close() {
       this.sm_shopList_overlay = false;
+      this.switchShopId = this.currShopId
     },
     // 查看服务时间
     sm_bi_contTime() {

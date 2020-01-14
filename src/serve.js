@@ -3,7 +3,7 @@ import { request, axiosByJson,o_axiosByJson } from './https'
 // import fetch from './common/js/fetch'
 
 // http://yydc.qiluhospital.com/patientOrdering.api/api/Patient/GetOpenid
-export const getOpenid = (authCode, opencode, pageURL = "/") => request('api/StaffOrder/GetOpenid', {
+export const getOpenid = (authCode, opencode, pageURL = "/Sindex") => request('api/StaffOrder/GetOpenid', {
     authCode: authCode,
     code: opencode,
     pageURL

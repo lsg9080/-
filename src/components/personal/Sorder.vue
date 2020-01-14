@@ -32,11 +32,7 @@
                 class="o_wrap_status_cancel_order"
                 @click="cancel_order(item.orderId)"
               >取消订单</button>
-              <button
-                v-if="item.status==2"
-                class="o_wrap_status_pay_order"
-                @click="payOrder(item)"
-              >
+              <button v-if="item.status==2" class="o_wrap_status_pay_order" @click="payOrder(item)">
                 去支付(剩余
                 <van-count-down :time="item.left_time" format="mm:ss" />)
               </button>
@@ -57,7 +53,7 @@
 </template>
 
 <script>
-import { getOrderList, orderCancel, orderPaid, getPrepayid } from "@/serve";
+import { getOrderList, orderCancel, orderPaid, getPrepayid } from "@/serve";//
 import payUtils from "@/common/js/wechat";
 import { encryptDes } from "@/common/js/utils";
 import { wechatAppId } from "@/config/auth";
@@ -65,7 +61,7 @@ import { formatDate } from "@/getParams";
 export default {
   data() {
     return {
-      pageSize: '20',
+      pageSize: "20",
       pageNum: -1,
       so_noOrder: false,
       orderList: [],
@@ -88,24 +84,6 @@ export default {
       });
     },
     loadOrder() {
-      /* let params = {
-        authCode: "101FCC56AB9147F69E75AC7AAC52D2BB",
-        pageSize: this.pageSize,
-        pageNum: this.pageNum,
-        weixinNo: window.globalDataPool.openid
-      };
-      this.$axios({
-        method: "POST",
-        url: "/api/api/StaffOrder/GetOrderList",
-        data: params,
-        transformRequest: [
-          function(data) {
-            return JSON.stringify(data);
-          }
-        ],
-        headers: { "Content-Type": "application/json" }
-      })*/
-
       getOrderList(this.pageSize, this.pageNum)
         .then(res => {
           console.log(res.data);
@@ -208,24 +186,32 @@ export default {
           orderCode: item.orderCode,
           amountEncrypt: amountEncrypt
         };
+    
         getPrepayid(params).then(res => {
-          console.log(res);
           if (res.result == "0") {
             let wxOptions = {
               appId: res.appId,
               nonceStr: res.nonceStr,
               package: res.package,
-              payId: res.payId,
               paySign: res.paySign,
               prepay_id: res.prepay_id,
-              timeStamp: res.timeStamp
+              timeStamp: res.timeStamp,
+
+              orderCode: item.orderCode,
+              payId: item.payId
             };
             console.log("从后端取到的微信参数：" + JSON.stringify(wxOptions));
             if (res.prepay_id) {
               payUtils.WxConfig(wxOptions);
-              payUtils.WXJSApi(wxOptions, () => {
-                this.$router.push({ name: "success" });
-              });
+              payUtils.WXJSApi(
+                wxOptions,
+                () => {
+                  this.$router.push({ name: "OrderCallback" });
+                },
+                () => {
+                  this.$toast("支付失败");
+                }
+              );
             }
           } else {
             this.$toast(res.msg);

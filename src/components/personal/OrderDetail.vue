@@ -192,9 +192,9 @@ export default {
           callTime: currrentTime,
           price: price,
           paymentId: this.paymentId,
+          amountEncrypt: amountEncrypt,
           payId: this.payId,
-          orderCode: this.orderCode,
-          amountEncrypt: amountEncrypt
+          orderCode: this.orderCode
         };
         getPrepayid(params).then(res => {
           if (res.result == "0") {
@@ -202,17 +202,25 @@ export default {
               appId: res.appId,
               nonceStr: res.nonceStr,
               package: res.package,
-              payId: res.payId,
               paySign: res.paySign,
               prepay_id: res.prepay_id,
-              timeStamp: res.timeStamp
+              timeStamp: res.timeStamp,
+
+              orderCode: this.orderCode,
+              payId: this.payId
             };
             console.log("从后端取到的微信参数：" + JSON.stringify(wxOptions));
             if (res.prepay_id) {
               payUtils.WxConfig(wxOptions);
-              payUtils.WXJSApi(wxOptions, () => {
-        this.$router.push({ name: "success" });
-      });
+              payUtils.WXJSApi(
+                wxOptions,
+                () => {
+                  this.$router.push({ name: "OrderCallback" });
+                },
+                () => {
+                  this.$toast("支付失败");
+                }
+              );
             }
           }
         });
@@ -222,9 +230,9 @@ export default {
      * 倒计时：订单有效期（1小时）,设置订单毫秒数，
      */
     cuntDown: function(order) {
-      console.log(order)
+      console.log(order);
       var time =
-        new Date(order.createTime.replace(/-/g,"/")).getTime() +
+        new Date(order.createTime.replace(/-/g, "/")).getTime() +
         1 * 60 * 60 * 1000 -
         new Date().getTime();
       if (time > 0) {

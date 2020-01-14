@@ -5,16 +5,11 @@ import router from './router'
 import store from './store'
 import 'amfe-flexible'
 
-
 import axios from 'axios'
-// import QS from 'qs'
 
 import './thirdParty/UI'
-import { defaultUrl} from './config/env'
+import { defaultUrl } from './config/env'
 import './common/base.css'
-// import './common/stylus/index.styl'
-
-// import request from './common/js/fetch';
 
 import 'vant/lib/index.css';
 
@@ -22,18 +17,17 @@ import components from './common/utils/components'
 Vue.use(components)
 
 
-// import { request } from './https'
-
-
 Vue.config.productionTip = false
 Vue.prototype.$axios = axios
-// Vue.prototype.baseURL = baseURL
 Vue.prototype.$defaultUrl = defaultUrl
-// Vue.prototype.request = request
-// import vConsole from 'vconsole'
-// Vue.prototype.$vConsole = new vConsole()
 
-
+/**
+ * 调试工具
+ */ 
+import vConsole from 'vconsole'
+if (process.env.NODE_ENV == 'production') {
+  Vue.prototype.$vConsole = new vConsole()
+}
 Vue.config.productionTip = false
 
 // 路由在跳转之前执行 的全局钩子
