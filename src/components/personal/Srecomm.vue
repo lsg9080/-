@@ -68,9 +68,9 @@ export default {
       sr_title: require("../../assets/Personal/t3.jpg"),
       sr_request: require("../../assets/Personal/icon6.png"),
       sex: "1",
-      age: 40,
-      weight: 60,
-      height: 175
+      age: 0,
+      weight: 0,
+      height: 0
     };
   },
   // 自执行
@@ -85,11 +85,11 @@ export default {
       getStaffInfo()
         .then(res => {
           console.log(res)
-          // let data = res.data;
-          // this.sex = data.sex;
-          // this.age = data.age;
-          // this.weight = data.weight;
-          // this.height = data.height;
+          let data = res.data;
+          this.sex = data.sex;
+          this.age = data.age<18?18:data.age;
+          this.weight = data.weight<20?20:data.weight;
+          this.height = data.height<90?90:data.height;
         })
         .catch(err => {
           console.log(err);

@@ -89,7 +89,7 @@ export default new Router({
       meta: { title: '在线订餐' }
     },
     {
-      path: '/ssubmit',
+      path: '/ssubmit/:shopId',
       name: 'Ssubmit',
       component: Ssubmit,
       meta: { title: '提交订单' }

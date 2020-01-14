@@ -766,7 +766,7 @@ export default {
         this.$store.commit('RECORD_MENULIST',this.sm_fi_menulist)
         // console.log('去结算')
         this.$router.push({
-          name: "Ssubmit"
+          name: "Ssubmit",params:{shopId:this.restaurantId}
         });
       }
     },

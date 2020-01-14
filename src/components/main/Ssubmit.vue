@@ -145,23 +145,26 @@ export default {
   computed: {
     ...mapState(["openid", "cartList", "restaurantId", "menuList"]),
     // 商家id
-    ss_shopid() {
-      return this.restaurantId;
-    }
+    // ss_shopid() {
+    //   return this.restaurantId;
+    // }
   },
   // 自执行
   created: function() {
     vm = this;
     // 获取商品信息
     this.ss_menuList = this.menuList;
+    this.ss_shopid = this.$route.params.shopId;
+    console.log(this.ss_shopid)
+    return;
     // 获取地址信息
-    this.getAddress();
+    /*this.getAddress();
     // 显示具体商品信息
     this.shopInfo();
     // 备注信息
     this.ss_payMethodescpanel = window.globalDataPool.note;
     // 获取支付方式
-    this.paymeth();
+    this.paymeth();*/
     // 2、微信初始化
     /* if (/MicroMessenger/.test(window.navigator.userAgent)) {
       weChatConfig(window.location.href).then(res => {
@@ -803,8 +806,10 @@ body {
 .ss_order_submit {
   width: 40%;
   /* float: right; */
+  font-size: 18px;
   text-align: center;
   background: #ee620b;
+  border:1px solid #ee620b;
   color: #fff;
   height: 45px;
   line-height: 45px;
