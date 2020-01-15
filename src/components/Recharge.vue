@@ -50,19 +50,9 @@ export default {
       value: null
     };
   },
-  mounted() {
-     this.$router.push({
-                name: "RechargeCallback"
-              });
-              return;
-  },
+
   created() {
-     
-      //  this.$router.push({
-      //       path: "/rechargeCallback",
-      //       query: { status: "ok", price: 10 }
-      //     });
-    // this.initLoadStaffInfo();
+    this.initLoadStaffInfo();
   },
   methods: {
     initLoadStaffInfo() {
@@ -102,7 +92,7 @@ export default {
       this.unifiedPay(price);
     },
     unifiedPay(price) {
-      price = parseInt(price, 10).toFixed(2); //价格单位‘元’
+      // price = parseInt(price, 10).toFixed(2); //价格单位‘元’
       //获取当前的日期yy-mm-dd hh:mm:ss
       let currentDate = formatDate(new Date(), "yyyyMMddhhmmss");
       let callTime = formatDate(new Date(), "yyyy-MM-dd hh:mm:ss");
@@ -133,6 +123,7 @@ export default {
         orderCode: orderCode,
         paymentId: 0, //预支付充值*/
       };
+      console.log(params)
       /*let a = {
         appId: "wxdf3faecaa389c105",
         body: "已充值11.00元",

@@ -123,13 +123,13 @@ export default {
         });
     },
     /**
-     * 倒计时：订单有效期（1小时）,设置订单毫秒数， 3*60*1000
+     * 倒计时：订单有效期（10分钟）,设置订单毫秒数， 3*60*1000
      */
     cuntDown: function(order) {
       // order.createTime = "2020/01/11 13:55:21";
       var time =
         Number(new Date(order.createTime.replace(/-/g, "/")).getTime()) +
-        1 * 60 * 60 * 1000 -
+        10 * 60 * 1000 -
         Number(new Date().getTime());
 
       if (time > 0) {

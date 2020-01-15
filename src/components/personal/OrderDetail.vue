@@ -227,13 +227,13 @@ export default {
       }
     },
     /**
-     * 倒计时：订单有效期（1小时）,设置订单毫秒数，
+     * 倒计时：订单有效期（10分钟）,设置订单毫秒数，
      */
     cuntDown: function(order) {
       console.log(order);
       var time =
         new Date(order.createTime.replace(/-/g, "/")).getTime() +
-        1 * 60 * 60 * 1000 -
+        10 * 60 * 1000 -
         new Date().getTime();
       if (time > 0) {
         this.countdown = time;

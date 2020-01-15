@@ -136,8 +136,10 @@ export default {
     }
   },
   watch: {
+    /**
+     * 1.切换餐次时：监听商品商品类型的改变，刷新显示，实现选中导航的第一个！！！
+     */
     menuList(newVal) {
-      console.log(newVal);
       this.$refs.scrollNav.refresh();
       this.current = newVal[0].menuTypeName;
     }

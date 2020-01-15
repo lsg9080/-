@@ -1,7 +1,5 @@
 <template>
   <div class="cube-scroll-nav" :class="{'cube-scroll-nav_side': side}">
-
-     
     <cube-sticky ref="sticky" :pos="scrollY" @change="stickyChangeHandler">
       <cube-scroll
         ref="scroll"
@@ -11,7 +9,6 @@
         @scroll="scrollHandler"
         @scroll-end="scrollEndHandler"
       >
-      
         <slot name="prepend"></slot>
         <div class="cube-scroll-nav-main">
           <cube-sticky-ele ref="navBarEle">
@@ -23,6 +20,7 @@
                 :current="active"
               >
                 <span slot-scope="props">{{props.txt}}</span>
+               
               </cube-scroll-nav-bar>
             </slot>
           </cube-sticky-ele>
@@ -35,9 +33,16 @@
             <div class="cube-scroll-nav-panels">
               <slot></slot>
             </div>
-            <template slot="fixed" v-if="!side">
-              <div></div>
+
+            
+            <template slot="fixed" slot-scope="props">
+              <ul class="sticky-header">
+                <li>{{props.active}}</li>
+              </ul>
             </template>
+            <!-- 原组件 <template slot="fixed" v-if="!side">
+              <div></div>
+            </template> -->
           </cube-sticky>
         </div>
       </cube-scroll>
@@ -46,7 +51,9 @@
 </template>
 
 <script type="text/ecmascript-6">
-// import scrollMixin from "../../common/mixins/srcoll";
+/**
+ * 原组件的使用会存在bug: 切换餐厅后，sticky-ele 不能及时刷新，导致第一个固定的是上一个餐厅的第一个类型的key 
+ */
 import { setTimeout } from "timers";
 
 const DIRECTION_H = "horizontal";
@@ -56,6 +63,7 @@ const COMPONENT_NAME = "cube-scroll-nav";
 const EVENT_CHANGE = "change";
 const EVENT_STICKY_CHANGE = "sticky-change";
 
+
 export default {
   name: COMPONENT_NAME,
   provide() {
@@ -63,7 +71,6 @@ export default {
       scrollNav: this
     };
   },
-  // mixins: [scrollMixin],
   props: {
     data: {
       type: Array
@@ -109,13 +116,15 @@ export default {
   },
   watch: {
     current(newVal) {
-      console.log(newVal);
+      console.log('115'+newVal);
       this.stickyCurrent = newVal;
       this.active = newVal;
       this.jumpTo(newVal);
       this.refresh();
     },
     active(newVal) {
+      this.$refs.pageSticky.refresh();
+
       this.$emit(EVENT_CHANGE, newVal);
     }
   },

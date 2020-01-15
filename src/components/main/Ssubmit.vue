@@ -99,23 +99,35 @@ import {
   getAddressList,
   getPaymentList,
   getStaffInfo,
-  getPrepayid
-  // getPrepayid2
+  getPrepayid,
+  orderPaid
 } from "@/serve";
 import payUtils from "@/common/js/wechat";
 import { encryptDes } from "@/common/js/utils";
 import { wechatAppId } from "@/config/auth";
 import { formatDate } from "@/getParams";
 import { mapState } from "vuex";
-// import fetch from '@/common/fetch'
-// import $ from '@/thirdParty/jquery'
 
 let vm;
+/**
+ * 支付方式分 4种；
+ * 1. 职工卡支付   paymentId：1      tempOrder：1
+ * 2. 到付        paymentId：2      tempOrder：1
+ * 3. 微信支付    paymentId：3      tempOrder：2
+ * 6.一卡通支付   paymentId：6      tempOrder：1
+ *
+ * tips:
+ * tempOrder  2：临时订单(微信支付)； 1：正常订单
+ * 方式1： 提交订单后 + 确认订单 => 订单状态由预支付到已支付
+ * 方式2： 提交订单
+ * 方式3： 提交订单 + 获取prepay_id + 微信sdk => 订单状态由最后支付操作决定
+ *         参数中‘orderCode,payId’ 必须传 并 在先后调用的接口中保持一致
+ * 方式4： 只有四川版！！的环境才能正常使用，其它都是不成功的
+ */
 export default {
   data() {
     return {
       ss_left_icon: require("../../assets/Smain/more.png"),
-      // ss_shopid: '',
       ss_menuList: [], // 商品信息
       ss_paymPop: false,
       ss_pop_close: require("../../assets/Smain/close.png"),
@@ -143,7 +155,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(["openid", "cartList", "restaurantId", "menuList"]),
+    ...mapState(["openid", "cartList", "restaurantId", "menuList"])
     // 商家id
     // ss_shopid() {
     //   return this.restaurantId;
@@ -155,16 +167,15 @@ export default {
     // 获取商品信息
     this.ss_menuList = this.menuList;
     this.ss_shopid = this.$route.params.shopId;
-    console.log(this.ss_shopid)
-    return;
+    console.log(this.ss_shopid);
+
     // 获取地址信息
-    /*this.getAddress();
+    this.getStaffInfo();
     // 显示具体商品信息
     this.shopInfo();
     // 备注信息
     this.ss_payMethodescpanel = window.globalDataPool.note;
-    // 获取支付方式
-    this.paymeth();*/
+
     // 2、微信初始化
     /* if (/MicroMessenger/.test(window.navigator.userAgent)) {
       weChatConfig(window.location.href).then(res => {
@@ -183,7 +194,7 @@ export default {
         .then(res => {
           if (res.result === "0") {
             if (this.cardId == null) {
-              // console.log('没有职工卡号，剔出职工卡支付');
+              // 没有职工卡号，剔出职工卡支付
               res.data = res.data.filter(function(item) {
                 return item.paymentId != 1;
               });
@@ -241,7 +252,7 @@ export default {
       });
     },
     // 获取用户信息
-    getAddress() {
+    getStaffInfo() {
       var $this = this;
       getStaffInfo()
         .then(res => {
@@ -270,6 +281,9 @@ export default {
             this.deptId = data.deptId;
             this.deptName = data.deptName;
             this.cardId = data.cardId;
+
+            // 获取支付方式
+            this.paymeth();
           } else {
             $this.$toast({
               message: res.msg,
@@ -390,10 +404,9 @@ export default {
             });
             this.disabled = false;
           }
-         
         })
         .catch(err => {
-           this.disabled = false;
+          this.disabled = false;
           console.log(err);
         });
     },
@@ -422,9 +435,20 @@ export default {
       for (var i = 0; i < this.ssMenu.length; i++) {
         this.ssMenu[i].qty = this.ssMenu[i].num;
       }
+      var randomstr =
+        (Math.random() * 10000000).toString(16).substr(0, 4) +
+        "-" +
+        new Date().getTime() +
+        "-" +
+        Math.random()
+          .toString()
+          .substr(2, 5);
+      var orderCode = "oc" + randomstr;
+      var payId = "pi" + orderCode;
+
       var params = {
         authCode: "101FCC56AB9147F69E75AC7AAC52D2BB",
-        weixinNo: this.openid,
+        // weixinNo: this.openid,
         shopId: this.ss_shopid,
 
         districtId: this.ss_distri_id,
@@ -445,7 +469,8 @@ export default {
 
         paymentId: this.ss_paymethod_list_chooseId,
         tempOrder: tempOrder, // 2：临时订单(微信支付), 1 正常订单
-        orderCode: "", // 微信支付必传
+        orderCode: orderCode,
+        payId: payId,
 
         cookbookId: window.localStorage.getItem("cookbookId")
       };
@@ -477,7 +502,7 @@ export default {
         })
         .catch(() => {
           // on cancel
-           this.disabled = false;
+          this.disabled = false;
           console.log("cancel");
         });
     },
@@ -490,30 +515,58 @@ export default {
           setTimeout(() => {
             this.$router.push({ name: "OrderCallback" });
           }, 1000);
-           this.disabled = false;
+          this.disabled = false;
         } else {
-           this.disabled = false;
+          this.disabled = false;
           this.$toast(res.msg);
         }
       });
     },
     // 职工卡支付
-    empCarPay() {
-      var $this = this;
-      let params = $this.ss_submitPram;
+    empCarPay(params) {
+      console.log(params);
       submitOrder(params).then(res => {
         if (res.result == "0") {
-          this.$toast("订单提交成功");
-          setTimeout(() => {
-            this.$router.replace({ name: "OrderCallback" });
-          }, 1000);
-           this.disabled = false;
+          /* this.$dialog
+            .confirm({
+              title: "提示",
+              message:
+                "已选择" +
+                this.ss_paymethod_list_chooseName +
+                "方式，是否确认支付?"
+            })
+            .then(() => {
+              this.confirmOrder(res.data.orderId);
+            })
+            .catch(() => {
+              // on cancel
+            });*/
+          this.confirmOrder(res.data.orderId);
         } else {
-           this.disabled = false;
+          this.disabled = false;
           this.$toast(res.msg);
         }
       });
     },
+
+    confirmOrder(orderId) {
+      orderPaid(orderId)
+        .then(res => {
+          if (res.result == "0") {
+            setTimeout(() => {
+              this.$router.replace({ name: "OrderCallback" });
+            }, 1000);
+          } else {
+            this.$toast.fail(res.msg);
+          }
+          this.disabled = false;
+        })
+        .catch(() => {
+          this.disabled = false;
+          this.$toast.fail("支付失败！");
+        });
+    },
+
     // 微信支付
     wechatPay(params) {
       this.getWXPrepayid(params);
@@ -529,16 +582,6 @@ export default {
       //获取body
       var body = "订单消费" + price + "元";
 
-      var randomstr =
-        (Math.random() * 10000000).toString(16).substr(0, 4) +
-        "-" +
-        new Date().getTime() +
-        "-" +
-        Math.random()
-          .toString()
-          .substr(2, 5);
-      var orderCode = "oc" + randomstr;
-      var payId = "pi" + orderCode;
       let options = {
         authCode: "101FCC56AB9147F69E75AC7AAC52D2BB",
         callFrom: "wincome",
@@ -547,10 +590,7 @@ export default {
         callTime: callTime,
         price: price,
         paymentId: this.ss_paymethod_list_chooseId,
-        amountEncrypt: amountEncrypt,
-
-        orderCode: orderCode,
-        payId: payId
+        amountEncrypt: amountEncrypt
       };
 
       getPrepayid(options)
@@ -563,28 +603,25 @@ export default {
               paySign: res.paySign,
               prepay_id: res.prepay_id,
               timeStamp: res.timeStamp,
-              orderCode: orderCode,
-              payId: payId
+              orderCode: params.orderCode,
+              payId: params.payId
             };
             if (res.prepay_id) {
               let options = {
                 deliveryTime: formatDate(new Date(), "hh:ss"),
-                payId: payId,
-                orderCode: orderCode,
                 tradeId: "",
                 tempOrder: 2
               };
               Object.assign(params, options);
-
               this.wechatSubmit(params, wxOptions);
             }
-             this.disabled = false;
+            this.disabled = false;
           } else {
             this.$toast({
               message: res.data.msg,
               forbidClick: true
             });
-             this.disabled = false;
+            this.disabled = false;
           }
         })
         .catch(() => {
@@ -638,7 +675,7 @@ orderCode: "WX202001101836187653"
     }
   },
   activated() {
-    this.getAddress();
+    this.getStaffInfo();
   }
 };
 </script>
@@ -809,7 +846,7 @@ body {
   font-size: 18px;
   text-align: center;
   background: #ee620b;
-  border:1px solid #ee620b;
+  border: 1px solid #ee620b;
   color: #fff;
   height: 45px;
   line-height: 45px;
