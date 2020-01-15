@@ -150,12 +150,19 @@ export default {
       ss_mobile: "",
       ss_submitPram: {},
       ss_payMethodescpanel: "",
-      cardId: null,
+      cardId: "",
       disabled: false
     };
   },
   computed: {
-    ...mapState(["openid", "cartList", "restaurantId", "menuList"])
+    ...mapState([
+      "openid",
+      "cartList",
+      "restaurantId",
+      "menuList",
+      "orderDate",
+      "cookbookId"
+    ])
     // 商家id
     // ss_shopid() {
     //   return this.restaurantId;
@@ -193,7 +200,7 @@ export default {
       getPaymentList(this.ss_shopid)
         .then(res => {
           if (res.result === "0") {
-            if (this.cardId == null) {
+            if (this.cardId == "") {
               // 没有职工卡号，剔出职工卡支付
               res.data = res.data.filter(function(item) {
                 return item.paymentId != 1;
@@ -300,9 +307,6 @@ export default {
     shopInfo() {
       // 当前餐次下的所有菜品
       let cartList = [];
-      // for (let key in this.cartList) {
-      //   cartList.push(this.cartList[key]);
-      // }
       cartList = this.ss_menuList.filter(item => item.num > 0);
       this.ssMenu = cartList;
 
@@ -457,22 +461,22 @@ export default {
         buildingName: this.ss_build_name,
         floorId: this.ss_floor_id,
         floorName: this.ss_floor_name,
-        deptName: "",
-        deptId: "",
+        deptName: this.deptName,
+        deptId: this.deptId,
         address: this.ss_address,
         mobile: this.ss_mobile,
         deliveryTime: deliveryTime,
         note: this.ss_payMethodescpanel,
         repastList: this.ssRepast,
         menuList: this.ssMenu,
-        orderDate: formatDate(new Date(), "yyyy-MM-dd"),
 
         paymentId: this.ss_paymethod_list_chooseId,
         tempOrder: tempOrder, // 2：临时订单(微信支付), 1 正常订单
         orderCode: orderCode,
         payId: payId,
 
-        cookbookId: window.localStorage.getItem("cookbookId")
+        orderDate: this.orderDate,
+        cookbookId: this.cookbookId
       };
 
       console.log(params);

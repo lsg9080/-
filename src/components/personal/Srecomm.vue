@@ -22,9 +22,8 @@
           title="年龄"
           title-class="sr_cont_item_cell"
           :icon="sr_request"
-          :value="age"
           size="large"
-        />
+        >{{age}}岁</van-cell>
         <van-slider v-model="age" active-color="#ee620b" :min="18" :max="120" :step="1"></van-slider>
       </div>
       <div class="sr_cont_item">
@@ -32,9 +31,8 @@
           title="体重"
           title-class="sr_cont_item_cell"
           :icon="sr_request"
-          :value="weight"
           size="large"
-        />
+        >{{weight}}kg</van-cell>
         <van-slider v-model="weight" active-color="#ee620b" :min="20" :max="200" :step="1"></van-slider>
       </div>
       <div class="sr_cont_item">
@@ -42,9 +40,8 @@
           title="身高"
           title-class="sr_cont_item_cell"
           :icon="sr_request"
-          :value="height"
           size="large"
-        />
+        >{{height}}cm</van-cell>
         <van-slider v-model="height" active-color="#ee620b" :min="90" :max="230" :step="1"></van-slider>
       </div>
     </div>

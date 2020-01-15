@@ -14,7 +14,18 @@ export default {
         state.openid = info
     },
 
-    // 记录选中餐厅的id
+    // 记录选中餐厅的 就餐日期
+    RECORD_ORDERDATE(state, info) {
+        state.orderDate = info
+    },
+
+    // 记录商品列表的父id
+    RECORD_COOKBOOK_ID(state, info) {
+        state.cookbookId = info
+    },
+
+    
+    // 记录下单前 选中的
     RECORD_RESTAURANT_ID(state, info) {
         state.restaurantId = info
      console.log(info)
@@ -50,7 +61,6 @@ export default {
         state.cartList = { ...cart };
         //存入localStorage
         sessionstorage.save('buyCart', state.cartList);
-        console.log(state)
     },
 
     // 移出购物车

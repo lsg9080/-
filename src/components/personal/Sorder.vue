@@ -34,7 +34,7 @@
               >取消订单</button>
               <button v-if="item.status==2" class="o_wrap_status_pay_order" @click="payOrder(item)">
                 去支付(剩余
-                <van-count-down :time="item.left_time" format="mm:ss" />)
+                <van-count-down :time="item.left_time" format="mm:ss"  @finish="finishCountDown(item.orderId)"/>)
               </button>
               <div class="clearBoth"></div>
             </div>
@@ -53,7 +53,7 @@
 </template>
 
 <script>
-import { getOrderList, orderCancel, orderPaid, getPrepayid } from "@/serve";//
+import { getOrderList, orderCancel, orderPaid, getPrepayid } from "@/serve"; //
 import payUtils from "@/common/js/wechat";
 import { encryptDes } from "@/common/js/utils";
 import { wechatAppId } from "@/config/auth";
@@ -116,17 +116,16 @@ export default {
             this.loading = false;
           }, 1000);
         })
-        .catch(err => {
+        .catch(() => {
           this.loading = false;
           this.finished = true;
-          console.log(err);
         });
     },
     /**
-     * 倒计时：订单有效期（10分钟）,设置订单毫秒数， 3*60*1000
+     * 倒计时：订单有效期（10分钟）,设置订单毫秒数， 1*60*1000
      */
     cuntDown: function(order) {
-      // order.createTime = "2020/01/11 13:55:21";
+      order.createTime = "2020/01/15 19:55:21";
       var time =
         Number(new Date(order.createTime.replace(/-/g, "/")).getTime()) +
         10 * 60 * 1000 -
@@ -139,7 +138,11 @@ export default {
         this.cancelOrder(order.orderId);
       }
     },
-
+    // 倒计时结束
+    finishCountDown(id) {
+      this.cancelOrder(id)
+    },
+    // 取消订单
     cancelOrder(id) {
       orderCancel(id).then(res => {
         if (res.data.result == 0) {
@@ -150,6 +153,7 @@ export default {
         }
       });
     },
+    // 支付订单
     payOrder(item) {
       console.log(item);
       if (item.paymentId == 1) {
@@ -186,7 +190,7 @@ export default {
           orderCode: item.orderCode,
           amountEncrypt: amountEncrypt
         };
-    
+
         getPrepayid(params).then(res => {
           if (res.result == "0") {
             let wxOptions = {

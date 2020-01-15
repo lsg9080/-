@@ -28,7 +28,7 @@
             <div class="clearBoth"></div>
           </section>
         </div>
-        <div class="od_repast_total">¥{{amount}}</div>
+        <div class="od_repast_total">¥{{repast.total}}</div>
       </div>
     </div>
 
@@ -91,7 +91,8 @@ export default {
       repastList: "", // 餐次
       validTime: "", //订单剩余时间
       orderId: "",
-      countdown: 0
+      countdown: 0,
+      goods:null
     };
   },
   // 自执行
@@ -99,7 +100,7 @@ export default {
     this.orderId = this.$route.params.orderId;
     this.init();
   },
-  mounted() {},
+
   methods: {
     init() {
       getOrderDetail(this.orderId).then(res => {
@@ -145,6 +146,7 @@ export default {
           if (data.status == 2) {
             this.cuntDown(data);
           }
+          this.goodsList();
         } else {
           this.$toast(res.msg);
         }
@@ -225,6 +227,23 @@ export default {
           }
         });
       }
+    },
+   
+    goodsList() {
+      //给餐次列表中添加 total 字段，记录每个餐次的总价
+      for (var i = 0; i < this.repastList.length; i++) {
+        var total = 0;
+        for (var j = 0; j < this.menuList.length; j++) {
+          if (this.repastList[i].repastId == this.menuList[j].repastId) {
+            total = total + this.menuList[j].amount;
+          }
+        }
+        this.repastList[i].total = total.toFixed(2);
+      }
+      this.goods = this.repastList.sort((a, b)=> {
+      return a.sortId - b.sortId;
+    });
+      console.log(this.goods);
     },
     /**
      * 倒计时：订单有效期（10分钟）,设置订单毫秒数，
