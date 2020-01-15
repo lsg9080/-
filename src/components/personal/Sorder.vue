@@ -36,6 +36,7 @@
                 去支付(剩余
                 <van-count-down :time="item.left_time" format="mm:ss" />)
               </button>
+              <button v-if="item.status==3||item.status==4" class='o_wrap_status_cancel_order' @click='refundOrder(item.orderId)'>在线退餐</button>
               <div class="clearBoth"></div>
             </div>
           </div>
@@ -53,7 +54,7 @@
 </template>
 
 <script>
-import { getOrderList, orderCancel, orderPaid, getPrepayid } from "@/serve";//
+import { getOrderList, orderCancel, orderPaid, getPrepayid ,orderRefund} from "@/serve";//
 import payUtils from "@/common/js/wechat";
 import { encryptDes } from "@/common/js/utils";
 import { wechatAppId } from "@/config/auth";
@@ -142,6 +143,16 @@ export default {
 
     cancelOrder(id) {
       orderCancel(id).then(res => {
+        if (res.data.result == 0) {
+          this.$toast({ message: res.data.note });
+          this.loadOrder(this.pageSize, 0);
+        } else {
+          this.$toast({ message: res.msg });
+        }
+      });
+    },
+    refundOrder(id){
+      orderRefund(id).then(res => {
         if (res.data.result == 0) {
           this.$toast({ message: res.data.note });
           this.loadOrder(this.pageSize, 0);

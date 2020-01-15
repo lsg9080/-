@@ -2,12 +2,13 @@
   <div>
     <div class="od_pay">
       <div class="od_pay_statusName">{{statusName}}</div>
-      <div v-if="status==2" class="o_wrap_status">
-        <button class="o_wrap_status_cancel_order" @click="cancelOrder(orderId)">取消订单</button>
-        <button class="o_wrap_status_pay_order" @click="payOrder">
+      <div  class="o_wrap_status">
+        <button v-if="status==2" class="o_wrap_status_cancel_order" @click="cancelOrder(orderId)">取消订单</button>
+        <button v-if="status==2" class="o_wrap_status_pay_order" @click="payOrder">
           去支付(剩余
           <van-count-down :time="countdown" format="mm:ss" />)
         </button>
+        <button v-if="status==3||status==4" class='o_wrap_status_cancel_order' @click='refundOrder(orderId)'>在线退餐</button>
         <div class="clearBoth"></div>
       </div>
     </div>
@@ -64,7 +65,7 @@
 </template>
 
 <script>
-import { orderCancel, orderPaid, getOrderDetail, getPrepayid } from "@/serve"; //
+import { orderCancel, orderPaid, getOrderDetail, getPrepayid ,orderRefund} from "@/serve"; //
 import payUtils from "@/common/js/wechat";
 import { wechatAppId } from "@/config/auth";
 import { encryptDes } from "@/common/js/utils"; //encryptionPay,
@@ -251,7 +252,16 @@ export default {
           this.$toast({ message: res.msg });
         }
       });
-    }
+    },
+    refundOrder(id){
+      orderRefund(id).then(res => {
+        if (res.data.result == 0) {
+          this.$toast({ message: res.data.note });
+        } else {
+          this.$toast({ message: res.msg });
+        }
+      });
+    },
   }
 };
 </script>

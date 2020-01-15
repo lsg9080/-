@@ -69,6 +69,11 @@ export const orderCancel = (orderId) => request('api/StaffOrder/OrderCancel', {
     orderId
 });
 
+export const orderRefund = (orderId) => request('api/StaffOrder/OrderRefund', {
+    'authCode': '101FCC56AB9147F69E75AC7AAC52D2BB',
+    orderId
+});
+
 export const orderPaid = (orderId) => request('api/StaffOrder/OrderPaid', {
     'authCode': '101FCC56AB9147F69E75AC7AAC52D2BB',
     orderId,
