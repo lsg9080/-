@@ -5,12 +5,23 @@
     <div class="sd_cell" @click="sd_floor_address">&nbsp; 楼层 &nbsp;&nbsp; {{sd_flood_name}}</div>
     <div class="sd_cell">
       &nbsp; 详细位置 &nbsp;&nbsp;
-      <input @input="sd_celldetail" class="sd_cell_detail" type="text" :value="sd_address" />
+      <input
+        @input="sd_celldetail"
+        class="sd_cell_detail"
+        maxlength="50"
+        type="text"
+        :value="sd_address"
+      />
     </div>
     <!-- {{sd_address}} -->
     <div class="sd_cell">
       &nbsp; 联系手机号 &nbsp;&nbsp;
-      <input @input="sd_cellphone" class="sd_cell_phone" type="number" :value="sd_phone" />
+      <input
+        @input="sd_cellphone"
+        class="sd_cell_phone"
+        type="number"
+        :value="sd_phone"
+      />
     </div>
     <!-- {{sd_phone}} -->
     <div class="sd_btn" @click="sd_modify_address">确定</div>
@@ -62,7 +73,7 @@
 
 <script>
 import { getStaffInfo, staffAddress, getAddressList } from "@/serve";
-import { mapState } from "vuex";
+
 export default {
   data() {
     return {
@@ -87,30 +98,31 @@ export default {
   // 自执行
   created: function() {
     // 获取商家id
-    this.sd_shopid = this.restaurantId;
+    this.sd_shopid = this.$route.query.shopId;
     // 获取个人信息
     this.getUserInfo();
     // 获取配送地址
     this.getAddress();
   },
-  computed: {
-    ...mapState(["restaurantId"])
-  },
   methods: {
     // 获取个人信息
     getUserInfo() {
       var $this = this;
+      let scope = this.$route.query.scope;
+      console.log(scope);
       getStaffInfo()
         .then(res => {
           if (res.result === "0") {
             let data = res.data;
+            if (scope) {
+              $this.sd_distri_name = data.districtName;
+              $this.sd_build_name = data.buildingName;
+              $this.sd_flood_name = data.floorName;
+              $this.sd_address = data.address;
+            }
             $this.sd_distri_id = data.districtId;
-            $this.sd_distri_name = data.districtName;
             $this.sd_build_id = data.buildingId;
-            $this.sd_build_name = data.buildingName;
             $this.sd_flood_id = data.floorId;
-            $this.sd_flood_name = data.floorName;
-            $this.sd_address = data.address;
             $this.sd_phone = data.mobile;
           } else {
             $this.$toast({

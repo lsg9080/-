@@ -8,8 +8,8 @@ import 'amfe-flexible'
 import axios from 'axios'
 
 import './thirdParty/UI'
-import { defaultUrl } from './config/env'
 import './common/base.css'
+import './common/styles/index.styl'
 
 import 'vant/lib/index.css';
 
@@ -19,7 +19,6 @@ Vue.use(components)
 
 Vue.config.productionTip = false
 Vue.prototype.$axios = axios
-Vue.prototype.$defaultUrl = defaultUrl
 
 /**
  * 调试工具

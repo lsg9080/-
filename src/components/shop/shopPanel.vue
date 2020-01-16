@@ -17,11 +17,12 @@
         :title="item.menuTypeName"
       >
         <div class="content">
-          <div class="sm_fi_list_menu" v-for="(itemMenu, index) in goodsList" :key="index">
+          <div class="sm_fi_list_menu" v-for="(itemMenu, index) in goods(item.menuTypeId)" :key="index">
             <div
               class="sm_fi_list_menu_item"
-              v-if="itemMenu.repastId == currRepastId && itemMenu.menuTypeId == item.menuTypeId"
             >
+              <!-- v-if="itemMenu.repastId == currRepastId && itemMenu.menuTypeId == item.menuTypeId" -->
+
               <div class="sm_fi_list_menu_item_left">
                 <img :src="itemMenu.picture" v-lazy="itemMenu.picture" />
                 <img
@@ -42,14 +43,14 @@
                 <div class="sm_fi_list_menu_item_right_num">
                   <label
                     class="sm_fi_list_mirpr_add"
-                    @click.self.stop="addToCart(itemMenu,itemMenu.id)"
+                    @touchend="addToCart(itemMenu,itemMenu.id,$event)"
                     v-if="itemMenu.remainingNum - itemMenu.num > 0"
                   >+</label>
                   <label class="sm_fi_list_mirpr_add_Dis" v-else>+</label>
                   <label class="sm_fi_list_mirpr_num" v-if="itemMenu.num > 0">{{itemMenu.num}}</label>
                   <label
                     class="sm_fi_list_mirpr_reduce"
-                    @click.self.stop="removeOutCart(itemMenu,itemMenu.id)"
+                    @touchend="removeOutCart(itemMenu,itemMenu.id,$event)"
                     v-if="itemMenu.num > 0"
                   >-</label>
                   <div class="clearboth"></div>
@@ -102,9 +103,14 @@ export default {
     scrollNav
   },
   computed: {
-    // current() {
-    //   return this.menuList[0].menuTypeName;
-    // }
+    goods() {
+      return function(menuTypeId) {
+        return this.goodsList.filter(
+          item =>
+            item.repastId == this.currRepastId && item.menuTypeId == menuTypeId
+        );
+      };
+    }
   },
   created() {
     // console.log(this.menuList);
@@ -127,11 +133,13 @@ export default {
     },
 
     // 菜谱面板 添加菜谱
-    addToCart(id, itemMenu) {
+    addToCart(id, itemMenu,e) {
+      e.stopPropagation()
       this.$emit("add-cart", itemMenu, id);
     },
     // 菜谱面板 减少菜谱
-    removeOutCart(id, itemMenu) {
+    removeOutCart(id, itemMenu,e) {
+      e.stopPropagation()
       this.$emit("remove-cart", itemMenu, id);
     }
   },
@@ -154,6 +162,7 @@ export default {
   border-right: 1px solid #fff;
   border-bottom: 1px solid #f8f8f8;
 }
+
 // .cube-scroll-nav-panel-title
 .cube-scroll-nav-panels {
   padding-bottom: 10px !important;

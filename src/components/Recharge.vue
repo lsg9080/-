@@ -92,7 +92,10 @@ export default {
       this.unifiedPay(price);
     },
     unifiedPay(price) {
-      // price = parseInt(price, 10).toFixed(2); //价格单位‘元’
+
+      price = parseInt(price, 10).toFixed(2); //价格单位‘元’
+
+
       //获取当前的日期yy-mm-dd hh:mm:ss
       let currentDate = formatDate(new Date(), "yyyyMMddhhmmss");
       let callTime = formatDate(new Date(), "yyyy-MM-dd hh:mm:ss");
@@ -192,6 +195,7 @@ export default {
         wxOptions,
         () => {
           this.$toast('充值成功')
+          this.initLoadStaffInfo();
           // this.$router.push({
           //   path: "/rechargeCallback",
           //   query: { status: "ok", price: wxOptions.price }
@@ -215,7 +219,7 @@ page {
   background: #fbfbfb;
 }
 .rc_title {
-  width: calc(100% - 15px);
+  width: calc(100% - 30px);
   text-align: center;
   background: #fff;
   /* color: #fff;  */

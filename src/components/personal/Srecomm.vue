@@ -22,9 +22,8 @@
           title="年龄"
           title-class="sr_cont_item_cell"
           :icon="sr_request"
-          :value="age"
           size="large"
-        />
+        >{{age}}岁</van-cell>
         <van-slider v-model="age" active-color="#ee620b" :min="18" :max="120" :step="1"></van-slider>
       </div>
       <div class="sr_cont_item">
@@ -32,9 +31,8 @@
           title="体重"
           title-class="sr_cont_item_cell"
           :icon="sr_request"
-          :value="weight"
           size="large"
-        />
+        >{{weight}}kg</van-cell>
         <van-slider v-model="weight" active-color="#ee620b" :min="20" :max="200" :step="1"></van-slider>
       </div>
       <div class="sr_cont_item">
@@ -42,9 +40,8 @@
           title="身高"
           title-class="sr_cont_item_cell"
           :icon="sr_request"
-          :value="height"
           size="large"
-        />
+        >{{height}}cm</van-cell>
         <van-slider v-model="height" active-color="#ee620b" :min="90" :max="230" :step="1"></van-slider>
       </div>
     </div>
@@ -68,9 +65,9 @@ export default {
       sr_title: require("../../assets/Personal/t3.jpg"),
       sr_request: require("../../assets/Personal/icon6.png"),
       sex: "1",
-      age: 0,
-      weight: 0,
-      height: 0
+      age: 35,
+      weight: 60,
+      height: 168
     };
   },
   // 自执行
@@ -84,12 +81,12 @@ export default {
     getInfo() {
       getStaffInfo()
         .then(res => {
-          console.log(res)
           let data = res.data;
           this.sex = data.sex;
-          this.age = data.age<18?18:data.age;
-          this.weight = data.weight<20?20:data.weight;
-          this.height = data.height<90?90:data.height;
+          // 未设置营养推荐，则设置默认值
+          this.age = data.age==0?this.age:data.age;
+          this.weight = data.weight==0?this.weight:data.weight;
+          this.height = data.height==0?this.height:data.height;
         })
         .catch(err => {
           console.log(err);

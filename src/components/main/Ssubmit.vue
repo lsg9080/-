@@ -6,7 +6,7 @@
         <div class="ss_distriInfo">
           <div class="ss_distriInfo_title">配送信息</div>
           <div class="ss_distriInfo_panel">
-            <div class="ss_distriInfo_panel_esc">{{ss_distii_esc}}</div>
+            <div class="ss_distriInfo_panel_esc">{{scope?ss_distii_esc:'请选择配送地址'}}</div>
             <img class="ss_distriInfo_panel_ico" :src="ss_left_icon" />
             <div class="clearboth"></div>
           </div>
@@ -134,7 +134,7 @@ export default {
       ss_paymethod_list: [],
       ss_paymethod_list_chooseId: "", // 当前选择的支付方式id
       ss_paymethod_list_chooseName: "", // 当前选择的支付方式name
-      ss_distii_esc: "请选择配送地址",
+      ss_distii_esc: "",
       ss_dist_namephone: "",
       ssMenu: [], // 有效的商品
       ssRepast: [], // 有效餐次
@@ -150,16 +150,22 @@ export default {
       ss_mobile: "",
       ss_submitPram: {},
       ss_payMethodescpanel: "",
-      cardId: null,
-      disabled: false
+      cardId: "",
+      disabled: false,
+      deliveryScope: null, // 配送范围
+      scope: true // 在配送范围内
     };
   },
   computed: {
-    ...mapState(["openid", "cartList", "restaurantId", "menuList"])
-    // 商家id
-    // ss_shopid() {
-    //   return this.restaurantId;
-    // }
+    ...mapState([
+      "openid",
+      "cartList",
+      "restaurantId",
+      "menuList",
+      "orderDate",
+      "cookbookId",
+      "remarkText"
+    ])
   },
   // 自执行
   created: function() {
@@ -173,8 +179,9 @@ export default {
     this.getStaffInfo();
     // 显示具体商品信息
     this.shopInfo();
+
     // 备注信息
-    this.ss_payMethodescpanel = window.globalDataPool.note;
+    this.ss_payMethodescpanel = this.remarkText;
 
     // 2、微信初始化
     /* if (/MicroMessenger/.test(window.navigator.userAgent)) {
@@ -193,7 +200,7 @@ export default {
       getPaymentList(this.ss_shopid)
         .then(res => {
           if (res.result === "0") {
-            if (this.cardId == null) {
+            if (this.cardId == "") {
               // 没有职工卡号，剔出职工卡支付
               res.data = res.data.filter(function(item) {
                 return item.paymentId != 1;
@@ -237,7 +244,8 @@ export default {
         path: "/sdistri",
         name: "Sdistri",
         query: {
-          // from: 'mealNotice'
+          scope: this.scope,
+          shopId: this.ss_shopid
         }
       });
     },
@@ -276,7 +284,7 @@ export default {
             $this.ss_build_name = data.buildingName;
             $this.ss_floor_id = data.floorId;
             $this.ss_floor_name = data.floorName;
-            $this.ss_address = data.address;
+            $this.ss_address = data.address ? data.address : "";
             $this.ss_mobile = data.mobile;
             this.deptId = data.deptId;
             this.deptName = data.deptName;
@@ -284,6 +292,8 @@ export default {
 
             // 获取支付方式
             this.paymeth();
+            // 配送范围
+            this.getDeliveryScope();
           } else {
             $this.$toast({
               message: res.msg,
@@ -300,9 +310,6 @@ export default {
     shopInfo() {
       // 当前餐次下的所有菜品
       let cartList = [];
-      // for (let key in this.cartList) {
-      //   cartList.push(this.cartList[key]);
-      // }
       cartList = this.ss_menuList.filter(item => item.num > 0);
       this.ssMenu = cartList;
 
@@ -342,73 +349,69 @@ export default {
       this.ssTotalPrice = totalPrice.toFixed(2);
       console.log(submitRepast);
     },
-    // 提交订单钱判断
-    ss_submitOrder() {
-      // 先判断配送地址是否有效
-      var $this = this;
-      this.disabled = true;
+    // 配送信息范围判断
+    getDeliveryScope() {
       getAddressList(this.ss_shopid)
         .then(res => {
           if (res.result === "0") {
+            this.deliveryScope = res.data;
             var dist = res.data; // 区域数组
             var buildArr = [];
             var floorArr = [];
+            // 区域
             const item = dist.findIndex(
-              item => item.districtId === $this.ss_distri_id
+              item => item.districtId === this.ss_distri_id
+            );
+            // 楼号
+            const itemB = buildArr.findIndex(
+              item => item.buildingId === this.ss_build_id
+            );
+            // 楼层
+            console.log(floorArr);
+            const itemF = floorArr.findIndex(
+              itemF => itemF.floorId === this.ss_floor_id
             );
 
             if (item >= 0) {
               buildArr = dist[item].buildingList;
-            } else {
-              $this.$toast({
-                message: "不在配送范围内！",
-                forbidClick: true,
-                duration: 3000
-              });
-              return;
-            }
-            console.log(buildArr);
-            const itemB = buildArr.findIndex(
-              item => item.buildingId === $this.ss_build_id
-            );
-            console.log(itemB);
-            if (itemB >= 0) {
+            } else if (itemB >= 0) {
               floorArr = buildArr[itemB].floorList;
-            } else {
-              $this.$toast({
-                message: "不在配送范围内！",
-                forbidClick: true,
-                duration: 3000
-              });
-              return;
-            }
-            console.log(floorArr);
-            const itemF = floorArr.findIndex(
-              itemF => itemF.floorId === $this.ss_floor_id
-            );
-            if (itemF >= 0) {
+            } else if (itemF >= 0) {
               console.log("地址再配送范围之内，可以配送");
-              $this.ss_orderParam();
+              this.scope = true;
             } else {
-              $this.$toast({
+              this.scope = false;
+              this.$toast({
                 message: "不在配送范围内！",
                 forbidClick: true,
                 duration: 3000
               });
             }
           } else {
-            $this.$toast({
+            this.$toast({
               message: res.msg,
               forbidClick: true,
               duration: 3000
             });
-            this.disabled = false;
+            // this.disabled = false;
           }
         })
         .catch(err => {
-          this.disabled = false;
+          // this.disabled = false;
           console.log(err);
         });
+    },
+    // 提交订单钱判断
+    ss_submitOrder() {
+      if (this.scope) {
+        this.ss_orderParam();
+      } else {
+        this.$toast({
+          message: "不在配送范围内！",
+          forbidClick: true,
+          duration: 3000
+        });
+      }
     },
     // 订单参数
     ss_orderParam() {
@@ -457,22 +460,22 @@ export default {
         buildingName: this.ss_build_name,
         floorId: this.ss_floor_id,
         floorName: this.ss_floor_name,
-        deptName: "",
-        deptId: "",
+        deptName: this.deptName,
+        deptId: this.deptId,
         address: this.ss_address,
         mobile: this.ss_mobile,
         deliveryTime: deliveryTime,
         note: this.ss_payMethodescpanel,
         repastList: this.ssRepast,
         menuList: this.ssMenu,
-        orderDate: formatDate(new Date(), "yyyy-MM-dd"),
 
         paymentId: this.ss_paymethod_list_chooseId,
         tempOrder: tempOrder, // 2：临时订单(微信支付), 1 正常订单
         orderCode: orderCode,
         payId: payId,
 
-        cookbookId: window.localStorage.getItem("cookbookId")
+        orderDate: this.orderDate,
+        cookbookId: this.cookbookId
       };
 
       console.log(params);
@@ -502,7 +505,7 @@ export default {
         })
         .catch(() => {
           // on cancel
-          this.disabled = false;
+          // this.disabled = false;
           console.log("cancel");
         });
     },
@@ -515,9 +518,9 @@ export default {
           setTimeout(() => {
             this.$router.push({ name: "OrderCallback" });
           }, 1000);
-          this.disabled = false;
+          // this.disabled = false;
         } else {
-          this.disabled = false;
+          // this.disabled = false;
           this.$toast(res.msg);
         }
       });
@@ -527,20 +530,6 @@ export default {
       console.log(params);
       submitOrder(params).then(res => {
         if (res.result == "0") {
-          /* this.$dialog
-            .confirm({
-              title: "提示",
-              message:
-                "已选择" +
-                this.ss_paymethod_list_chooseName +
-                "方式，是否确认支付?"
-            })
-            .then(() => {
-              this.confirmOrder(res.data.orderId);
-            })
-            .catch(() => {
-              // on cancel
-            });*/
           this.confirmOrder(res.data.orderId);
         } else {
           this.disabled = false;
@@ -562,7 +551,7 @@ export default {
           this.disabled = false;
         })
         .catch(() => {
-          this.disabled = false;
+          // this.disabled = false;
           this.$toast.fail("支付失败！");
         });
     },
@@ -590,8 +579,11 @@ export default {
         callTime: callTime,
         price: price,
         paymentId: this.ss_paymethod_list_chooseId,
-        amountEncrypt: amountEncrypt
+        amountEncrypt: amountEncrypt,
+        orderCode: params.orderCode,
+        payId: params.payId
       };
+      console.log(options);
 
       getPrepayid(options)
         .then(res => {
@@ -602,9 +594,7 @@ export default {
               package: res.package,
               paySign: res.paySign,
               prepay_id: res.prepay_id,
-              timeStamp: res.timeStamp,
-              orderCode: params.orderCode,
-              payId: params.payId
+              timeStamp: res.timeStamp
             };
             if (res.prepay_id) {
               let options = {
@@ -615,13 +605,13 @@ export default {
               Object.assign(params, options);
               this.wechatSubmit(params, wxOptions);
             }
-            this.disabled = false;
+            // this.disabled = false;
           } else {
             this.$toast({
               message: res.data.msg,
               forbidClick: true
             });
-            this.disabled = false;
+            // this.disabled = false;
           }
         })
         .catch(() => {
@@ -669,7 +659,7 @@ orderCode: "WX202001101836187653"
           this.$router.push({ name: "OrderCallback" });
         },
         () => {
-          this.$toast("支付失败");
+          this.$router.push({ name: "Sorder" });
         }
       );
     }

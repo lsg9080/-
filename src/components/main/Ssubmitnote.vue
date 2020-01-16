@@ -25,10 +25,7 @@ export default {
   
   methods: {
     confirm() {
-      window.globalDataPool.note = this.message;
-      // this.$router.push({
-      //   name: "Ssubmit"
-      // });
+      this.$store.commit("CONFIRM_REMARK",this.message)
       this.$router.go(-1)
     }
   }

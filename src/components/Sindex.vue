@@ -71,7 +71,7 @@ export default {
   },
   // 自执行
   created: function() {
-    this.$store.commit("RECORD_OPENID", "ocWCVwjK_kseL-qYB83YuQYk6l3Q");
+    // this.$store.commit("RECORD_OPENID", "ocWCVwjK_kseL-qYB83YuQYk6l3Q");
     // window.localStorage.removeItem("openid")
     // window.localStorage.setItem("openid", "o1ixfwI3WBM1zq91r_Rh7vvcJj-s");
     // window.localStorage.setItem("openid", "oMrcc5A7etjdfb9ClHbNJ97d0UVM");
@@ -192,7 +192,8 @@ export default {
 }
 .si_cell {
   width: 90%;
-  margin: 0 auto;
+      padding: 0 5%;
+  background: #fff;
 }
 .si_cell_item {
   width: 100%;

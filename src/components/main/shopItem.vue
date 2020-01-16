@@ -99,7 +99,7 @@
       </div>
       <div
         :class="[{'sm_si_submitS':sm_si_shop_num>0},'sm_si_submit']"
-        @click.self.stop="sm_submit"
+        @click.stop="sm_submit"
       >去结算</div>
       <div class="clearboth"></div>
     </div>
@@ -167,7 +167,7 @@
             <div class="sm_spppn_energy_panel_panel">
               <div class="sm_spppn_energy_panel_panel_pro" :style="{'width': sm_spppn_acjcal_pro}"></div>
             </div>
-            <div class="sm_spppn_energy_panel_kjcal">{{sm_spppn_acjcal}}cal</div>
+            <div class="sm_spppn_energy_panel_kjcal">{{sm_spppn_acjcal}}Kcal</div>
             <div class="clearboth"></div>
             <div class="sm_spppn_energy_panel_title">推荐</div>
             <div class="sm_spppn_energy_panel_panel">
@@ -250,7 +250,8 @@
             <div class="sm_sti_overlay_contM_item_list">
               <div
                 @click.self.stop="sm_chooseResverTime(item.orderDate)"
-                class="sm_sti_overlay_contM_item_list_item"
+                class="sm_sti_overlay_contM_item_list_item "
+                :class="shop_select_time==item.orderDate?'primary-text':''"
                 v-for="(item, index) in sm_sti_serverTimeList"
                 :key="index"
               >{{item.orderDate}}</div>
@@ -592,7 +593,7 @@ export default {
         .then(res => {
           if (res.result === "0") {
             let data = res.data;
-            window.localStorage.setItem("cookbookId", data.cookbookId);
+            this.$store.commit("RECORD_COOKBOOK_ID",data.cookbookId);
             for (var i = 0; i < data.menuList.length; i++) {
               data.menuList[i].num = 0;
               data.menuList[i].id = i + 1;
@@ -645,7 +646,7 @@ export default {
     },
 
     // 菜谱面板 添加菜谱
-    sm_panel_add(id, item) {
+    sm_panel_add(id) {
       var $this = this;
       for (var i = 0; i < $this.sm_fi_menulist.length; i++) {
         if (
@@ -655,13 +656,12 @@ export default {
           return;
         }
         if ($this.sm_fi_menulist[i].id === id) {
+          console.log($this.sm_fi_menulist[i].num)
           $this.sm_fi_menulist[i].num++;
         }
       }
       // 处理submit信息
       $this.sm_subPanel();
-
-      this.$store.commit("ADD_CART", item);
     },
     // 菜谱面板 减少菜谱
     sm_panel_reduce(id) {
@@ -758,13 +758,11 @@ export default {
     },
     // 去结算
     sm_submit() {
+      console.log(11)
       var $this = this;
       if ($this.sm_si_shop_num > 0) {
-        window.localStorage.setItem("orderDate", $this.shop_select_time);
-        // 去结算
-        console.log(this.sm_fi_menulist);
+        this.$store.commit('RECORD_ORDERDATE',this.shop_select_time)
         this.$store.commit('RECORD_MENULIST',this.sm_fi_menulist)
-        // console.log('去结算')
         this.$router.push({
           name: "Ssubmit",params:{shopId:this.restaurantId}
         });
@@ -817,11 +815,10 @@ export default {
       // 获取推荐营养素
       var $this = this;
       getStandardNutrition()
-        .then(data => {
-          console.log(data);
-          if (data.data.result === "0") {
-            $this.sm_spppn_ekjcal = data.data.data.energy; // 推荐的能量
-            // sm_fi_menulist
+        .then(res => {
+          if (res.result === "0") {
+            let data = res.data;
+            $this.sm_spppn_ekjcal = data.energy; // 推荐的能量
             var actEnergy = 0;
             var actDBZ = 0;
             var actZF = 0;
@@ -841,19 +838,15 @@ export default {
                 $this.sm_fi_menulist[i].num * $this.sm_fi_menulist[i].carbohydr;
             }
             $this.sm_spppn_acjcal = actEnergy.toFixed(2); // 实际的能量
-            // sm_spppn_acjcal
-            // actEnergy * 95 / parseFloat(data.data.data.energy, 10)
-            console.log(
-              (actEnergy * 95) / parseFloat(data.data.data.energy, 10)
-            );
+           
             $this.sm_spppn_acjcal_pro =
-              (actEnergy * 95) / data.data.data.energy + "%";
+              (actEnergy * 95) / data.energy + "%";
 
             var actDBZP = ((actDBZ / (actDBZ + actZF + actTS)) * 100).toFixed(
               2
             );
             var actZFP = ((actZF / (actDBZ + actZF + actTS)) * 100).toFixed(2);
-            var actTSP = 100 - actDBZP - actZFP;
+            var actTSP = (100 - actDBZP - actZFP).toFixed(2);
             $this.sm_s_finD = actDBZP + "%";
             $this.sm_s_finZ = actZFP + "%";
             $this.sm_s_finT = actTSP + "%";
@@ -863,16 +856,16 @@ export default {
             // sm_s_finT: '0%'  carbohydr
             //
             var fd =
-              (data.data.data.protein /
-                (data.data.data.protein +
-                  data.data.data.fat +
-                  data.data.data.carbohydr)) *
+              (data.protein /
+                (data.protein +
+                  data.fat +
+                  data.carbohydr)) *
               100;
             var fz =
-              (data.data.data.fat /
-                (data.data.data.protein +
-                  data.data.data.fat +
-                  data.data.data.carbohydr)) *
+              (data.fat /
+                (data.protein +
+                  data.fat +
+                  data.carbohydr)) *
               100;
             $this.sm_finD = fd + "%";
             $this.sm_finZ = fz + "%";

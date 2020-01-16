@@ -556,7 +556,8 @@ export default {
         .then(res => {
           if (res.result === "0") {
             let data = res.data;
-            window.localStorage.setItem("cookbookId", data.cookbookId);
+            this.$store.commit("RECORD_COOKBOOK_ID",data.cookbookId);
+
             for (var i = 0; i < data.menuList.length; i++) {
               data.menuList[i].num = 0;
               data.menuList[i].id = i + 1;
@@ -719,11 +720,8 @@ export default {
     sm_submit() {
       var $this = this;
       if ($this.sm_si_shop_num > 0) {
-        // this.sm_shop_select_time
-        window.localStorage.setItem("orderDate", $this.sm_shop_select_time);
-        // 去结算
+        this.$store.commit('RECORD_ORDERDATE',this.shop_select_time)
         this.$store.commit("RECORD_MENULIST", this.sm_fi_menulist);
-        // console.log('去结算')
         this.$router.push({
           name: "Ssubmit",
           params:{shopId:this.supermarketId}

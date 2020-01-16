@@ -15,7 +15,8 @@ const state = {
 	menuList:{}, // 当前商店、餐厅的商品列表
 	openid:null,
 	restaurantId:null,
-	supermarketId:null
+	supermarketId:null,
+	remarkText:null,//备注
 }
 
 
