@@ -1,5 +1,6 @@
 <template>
   <div class="container">
+
     <scroll-nav
       ref="scrollNav"
       :side="true"
@@ -9,7 +10,6 @@
       @sticky-change="stickyChangeHandler"
       @refresh="refreshHandler"
     >
-      <!-- ,index -->
       <cube-scroll-nav-panel
         v-for="(item) in menuList"
         :key="item.menuTypeName"
@@ -17,10 +17,12 @@
         :title="item.menuTypeName"
       >
         <div class="content">
-          <div class="sm_fi_list_menu" v-for="(itemMenu, index) in goods(item.menuTypeId)" :key="index">
-            <div
-              class="sm_fi_list_menu_item"
-            >
+          <div
+            class="sm_fi_list_menu"
+            v-for="(itemMenu, index) in goods(item.menuTypeId)"
+            :key="index"
+          >
+            <div class="sm_fi_list_menu_item">
               <!-- v-if="itemMenu.repastId == currRepastId && itemMenu.menuTypeId == item.menuTypeId" -->
 
               <div class="sm_fi_list_menu_item_left">
@@ -40,6 +42,8 @@
                 <div class="sm_fi_list_menu_item_right_price">
                   <div class="sm_fi_list_menu_item_right_price_left">¥{{itemMenu.price}}</div>
                 </div>
+
+                <!-- <cart-control :food="itemMenu" ></cart-control> -->
                 <div class="sm_fi_list_menu_item_right_num">
                   <label
                     class="sm_fi_list_mirpr_add"
@@ -77,7 +81,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-import scrollNav from "@/components/scroll/scroll-nav";
+import scrollNav from "@/components/children/scrollNav";
 export default {
   data() {
     return {
@@ -133,13 +137,13 @@ export default {
     },
 
     // 菜谱面板 添加菜谱
-    addToCart(id, itemMenu,e) {
-      e.stopPropagation()
+    addToCart(id, itemMenu, e) {
+      e.stopPropagation();
       this.$emit("add-cart", itemMenu, id);
     },
     // 菜谱面板 减少菜谱
-    removeOutCart(id, itemMenu,e) {
-      e.stopPropagation()
+    removeOutCart(id, itemMenu, e) {
+      e.stopPropagation();
       this.$emit("remove-cart", itemMenu, id);
     }
   },

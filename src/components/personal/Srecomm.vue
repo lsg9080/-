@@ -42,7 +42,7 @@
           :icon="sr_request"
           size="large"
         >{{height}}cm</van-cell>
-        <van-slider v-model="height" active-color="#ee620b" :min="90" :max="230" :step="1"></van-slider>
+        <van-slider v-model="height" active-color="#ee620b" :min="110" :max="230" :step="1"></van-slider>
       </div>
     </div>
     <div class="sc_recommNutri">

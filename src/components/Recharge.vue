@@ -37,7 +37,7 @@
 </template>  
 
 <script>
-import { getStaffInfo , getPrepayid} from "@/serve"; //
+import { getStaffInfo, getPrepayid } from "@/serve"; //
 import payUtils from "@/common/js/wechat";
 import { encryptDes } from "@/common/js/utils"; //encryptionPay,
 import { wechatAppId } from "@/config/auth";
@@ -82,6 +82,7 @@ export default {
         });
         return;
       }
+      console.log(price);
       if (price == 0) {
         this.$toast({
           message: "金额必须大于0",
@@ -92,10 +93,7 @@ export default {
       this.unifiedPay(price);
     },
     unifiedPay(price) {
-
       price = parseInt(price, 10).toFixed(2); //价格单位‘元’
-
-
       //获取当前的日期yy-mm-dd hh:mm:ss
       let currentDate = formatDate(new Date(), "yyyyMMddhhmmss");
       let callTime = formatDate(new Date(), "yyyy-MM-dd hh:mm:ss");
@@ -104,16 +102,6 @@ export default {
       //获取body
       var body = "已充值" + price + "元";
 
-     /* var randomstr =
-        (Math.random() * 10000000).toString(16).substr(0, 4) +
-        "-" +
-        new Date().getTime() +
-        "-" +
-        Math.random()
-          .toString()
-          .substr(2, 5);
-      var orderCode = "oc" + randomstr;
-      var payId = "pi" + orderCode;*/
       let params = {
         authCode: "101FCC56AB9147F69E75AC7AAC52D2BB",
         callFrom: "wincome",
@@ -121,27 +109,10 @@ export default {
         body: body,
         callTime: callTime,
         price: price,
-        amountEncrypt: amountEncrypt,
-        /*payId: payId,
-        orderCode: orderCode,
-        paymentId: 0, //预支付充值*/
+        amountEncrypt: amountEncrypt
       };
-      console.log(params)
-      /*let a = {
-        appId: "wxdf3faecaa389c105",
-        body: "已充值11.00元",
-        price: 11.0,
-        paymentId: 0,
-        orderCode: "oc7d41 - 1578373942999 - 28126",
-        payId: "pioc7d41-1578373942999 - 28126",
-        amountEncrypt:
-          "B37C906108B5A9A3F613134CDD3BDA60CC39A88C448442B1D5EA8FF1F29275A8",
-        authCode: "101FCC56AB9147F69E75AC7AAC52D2BB",
-        weixinNo: "oMrcc5A7etjdfb9ClHbNJ97d0UVM",
-        callFrom: "wincome",
-        callTime: "2020-01 - 07 13: 12: 22"
-      };*/
-    
+      console.log(params);
+
       getPrepayid(params)
         .then(res => {
           if (res.result == "0") {
@@ -190,11 +161,10 @@ export default {
       };
       Object.assign(wxOptions, opt);
       console.log("从后端取到的微信参数：" + JSON.stringify(wxOptions));
-      payUtils.WxConfig(wxOptions);
       payUtils.WXJSApi(
         wxOptions,
         () => {
-          this.$toast('充值成功')
+          this.$toast("充值成功");
           this.initLoadStaffInfo();
           // this.$router.push({
           //   path: "/rechargeCallback",
@@ -202,7 +172,7 @@ export default {
           // });
         },
         () => {
-          this.$toast('充值失败')
+          this.$toast("充值失败");
           // this.$router.push({
           //   path: "/rechargeCallback",
           //   query: { status: "fail" }

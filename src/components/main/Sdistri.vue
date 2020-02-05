@@ -16,12 +16,7 @@
     <!-- {{sd_address}} -->
     <div class="sd_cell">
       &nbsp; 联系手机号 &nbsp;&nbsp;
-      <input
-        @input="sd_cellphone"
-        class="sd_cell_phone"
-        type="number"
-        :value="sd_phone"
-      />
+      <van-field class="sd_cell_phone" v-model="sd_phone" type="tel" maxlength="11" />
     </div>
     <!-- {{sd_phone}} -->
     <div class="sd_btn" @click="sd_modify_address">确定</div>
@@ -109,7 +104,6 @@ export default {
     getUserInfo() {
       var $this = this;
       let scope = this.$route.query.scope;
-      console.log(scope);
       getStaffInfo()
         .then(res => {
           if (res.result === "0") {
@@ -234,8 +228,8 @@ export default {
     },
     sd_cellphone(e) {
       console.log(e);
-      console.log(e.target.value);
-      this.sd_phone = e.target.value;
+      console.log(e.target.value.length);
+      // this.sd_phone = e.target.value.slice(0, 11);
     },
     // 确认修改地址
     sd_modify_address() {
@@ -295,15 +289,23 @@ export default {
 </script>
 
 <style scoped>
+
+.sd_cell_phone /deep/ .van-field__control {
+  font-size: 16px;
+}
+.sd_cell_phone {
+  padding: 0;
+}
 .sd {
   width: calc(100% - 18px);
   margin-left: 10px;
   padding-top: 10px;
 }
 .sd_cell {
-  width: 100%;
+  display: flex;
   height: 38px;
   line-height: 38px;
+  padding-left: 10px;
   margin-top: 18px;
   background: #fff;
   border: 1px solid #efefef;

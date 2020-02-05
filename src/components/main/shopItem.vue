@@ -1,5 +1,6 @@
 <template>
   <div class="sm">
+
     <!-- food info -->
     <section ref="header" class="page-hd">
       <!-- business info -->
@@ -28,7 +29,9 @@
       <!-- select time info -->
       <div class="sm_sti" @click.stop="sm_stiReserve">
         <img class="sm_sti_reserve" src="../../assets/Smain/yudin.png" />
-        <label class="sm_sti_txt">{{shop_select_time}}</label>
+        <label
+          class="sm_sti_txt"
+        >{{formatOrderDate}}</label>
         <img class="sm_sti_down" src="../../assets/Smain/down.png" />
         <div class="clearboth"></div>
       </div>
@@ -47,30 +50,30 @@
       </div>
     </section>
     <!-- <cube-scroll ref="scroll" :options="options" :scroll-events="['scroll']" :threshold="0"> -->
-      <div class="sm_fi">
-        <div v-if="isClosed">
-          <div class="so_empty">
-            <img src="../../assets/empty.png" />
-            <div>当前餐厅已过服务时间</div>
-          </div>
+    <div class="sm_fi">
+      <div v-if="isClosed">
+        <div class="so_empty">
+          <img src="../../assets/empty.png" />
+          <div>当前餐厅已过服务时间</div>
         </div>
-        <div v-else-if="currMenuTypeId==-1&&sm_temp_menuTypeList.length==0">
-          <div class="so_empty">
-            <img src="../../assets/empty.png" />
-            <div>当前餐次未配置</div>
-          </div>
-        </div>
-        <shop-panel
-          v-else-if="sm_fi_menulist.length"
-          :menuList="sm_temp_menuTypeList"
-          :goodsList="sm_fi_menulist"
-          :currRepastId="currRepastId"
-          :showDesc="true"
-          @check-nutrient="sm_fi_menu_nutri"
-          @add-cart="sm_panel_add"
-          @remove-cart="sm_panel_reduce"
-        ></shop-panel>
       </div>
+      <div v-else-if="currMenuTypeId==-1&&sm_temp_menuTypeList.length==0">
+        <div class="so_empty">
+          <img src="../../assets/empty.png" />
+          <div>当前餐次未配置</div>
+        </div>
+      </div>
+      <shop-panel
+        v-else-if="sm_fi_menulist.length"
+        :menuList="sm_temp_menuTypeList"
+        :goodsList="sm_fi_menulist"
+        :currRepastId="currRepastId"
+        :showDesc="true"
+        @check-nutrient="sm_fi_menu_nutri"
+        @add-cart="sm_panel_add"
+        @remove-cart="sm_panel_reduce"
+      ></shop-panel>
+    </div>
     <!-- </cube-scroll> -->
 
     <!-- nutri program -->
@@ -97,10 +100,7 @@
       <div class="sm_si_price" @click="sm_shopcarts_oc">
         <div v-if="sm_si_shop_price>0" class="sm_si_price_price">¥{{sm_si_shop_price}}</div>
       </div>
-      <div
-        :class="[{'sm_si_submitS':sm_si_shop_num>0},'sm_si_submit']"
-        @click.stop="sm_submit"
-      >去结算</div>
+      <div :class="[{'sm_si_submitS':sm_si_shop_num>0},'sm_si_submit']" @click.stop="sm_submit">去结算</div>
       <div class="clearboth"></div>
     </div>
     <!-- 购物车面板(vant组件实现起来需要改动较多，自己手写panel) -->
@@ -117,7 +117,9 @@
             <label>营养分析</label>
           </div>
         </div>
-        <div class="sm_spp_panel_data">{{shop_select_time}}</div>
+        <div
+          class="sm_spp_panel_data"
+        >{{formatOrderDate}}</div>
         <div class="sm_spp_panel_list">
           <div v-if="sm_repast_un.length > 0">
             <div v-for="(itemRepast) in sm_repast_un" :key="itemRepast.repastId">
@@ -129,7 +131,7 @@
                 >
                   <div class="sm_spp_pl_item_name">{{item.menuName}}</div>
                   <div class="sm_spp_pl_item_num">¥{{item.price}}</div>
-                  <div class="">
+                  <div class>
                     <label
                       class="sm_fi_list_mirpr_add"
                       @click.self.stop="sm_panel_add(item.id)"
@@ -144,13 +146,7 @@
                     >-</label>
                     <div class="clearboth"></div>
                   </div>
-                  <!-- <div class="sm_spp_pl_item_price">
-                    <div class="sm_spp_pl_item_price_reduce" @click="sm_panel_reduce(item.id)">-</div>
-                    <div class="sm_spp_pl_item_price_num">{{item.num}}</div>
-                    <div class="sm_spp_pl_item_price_add" @click="sm_panel_add(item.id)">+</div>
-                  </div> -->
                   <div class="clearboth"></div>
-                  <!-- ×{{item.num}} -->
                 </div>
               </div>
             </div>
@@ -158,7 +154,9 @@
         </div>
       </div>
       <div v-show="!sm_spp_panel_show" class="sm_spp_panel">
-        <div class="sm_spppn_title">&nbsp;&nbsp;{{shop_select_time}}</div>
+        <div
+          class="sm_spppn_title"
+        >&nbsp;&nbsp;{{formatOrderDate}}</div>
         <div class="sm_spppn_pxline"></div>
         <div class="sm_spppn_energy">
           <div class="sm_spppn_energy_title">能量摄入</div>
@@ -210,24 +208,29 @@
       </div>
     </div>
     <!-- 遮罩层 -->
+
     <van-overlay :show="sm_shopList_overlay">
       <div class="sm_shopList_overlayC">
         <div class="sm_shopList_overlayCont">
           <div class="sm_shopList_overlayCont_shoplist">
             <div class="sm_shopList_overlayCont_shoplist_title">请选择餐厅</div>
+
             <div class="sm_shopList_overlayCont_shoplist_cont">
-              <div
-                @click="switchShop(index,item.shopId)"
-                :class="[{'sm_slolcslc_itemS':switchShopId==item.shopId},'sm_slolcslc_item']"
-                v-for="(item, index) in sm_shopList"
-                :key="item.shopId"
-              >
-                <label class="sm_slolcslc_item_img">
-                  <img src="../../assets/Smain/choose.png" v-show="switchShopId==item.shopId" />
-                </label>
-                <label class="sm_slolcslc_item_name">{{item.shopName}}</label>
+              <div class="content">
+                <div
+                  @click="switchShop(index,item.shopId)"
+                  :class="[{'sm_slolcslc_itemS':switchShopId==item.shopId},'sm_slolcslc_item']"
+                  v-for="(item, index) in sm_shopList"
+                  :key="item.shopId"
+                >
+                  <label class="sm_slolcslc_item_img">
+                    <img src="../../assets/Smain/choose.png" v-show="switchShopId==item.shopId" />
+                  </label>
+                  <label class="sm_slolcslc_item_name">{{item.shopName}}</label>
+                </div>
               </div>
             </div>
+
             <div class="sm_shopList_overlayCont_shoplist_btn">
               <van-button @click.self.stop="sm_chooseShop" large color="#8db0d0">确 定</van-button>
             </div>
@@ -249,12 +252,12 @@
             <div class="sm_sti_overlay_contM_item_title">预定日期</div>
             <div class="sm_sti_overlay_contM_item_list">
               <div
-                @click.self.stop="sm_chooseResverTime(item.orderDate)"
-                class="sm_sti_overlay_contM_item_list_item "
-                :class="shop_select_time==item.orderDate?'primary-text':''"
+                @click.self.stop="sm_chooseResverTime(index)"
+                class="sm_sti_overlay_contM_item_list_item"
+                :class="selectShopDateIndex==index?'primary-text':''"
                 v-for="(item, index) in sm_sti_serverTimeList"
                 :key="index"
-              >{{item.orderDate}}</div>
+              >{{item.orderDate}}&nbsp;{{item.week}}</div>
             </div>
           </div>
           <div class="sm_sti_overlay_contM_close">
@@ -332,6 +335,7 @@ import {
   getShopList
 } from "@/serve";
 import { mapState } from "vuex";
+
 let vm;
 
 export default {
@@ -342,7 +346,7 @@ export default {
       sm_shop_choose_id: "",
       currShopId: "",
       sm_shopInfo: {}, // 商家信息
-      shop_select_time: "", // 当前时间
+      selectShopDateIndex: 0, // 选择预定日期的索引
       shop_select_repast: [], // 当前时间餐次数组
       sm_shop_serverTime: "", // 服务时间
       sm_sti_overlay: false,
@@ -386,7 +390,7 @@ export default {
       sm_s_finZ: "0%",
       sm_s_finT: "0%",
       isClosed: false,
-      switchShopId:null
+      switchShopId: null
     };
   },
   // 自执行
@@ -396,10 +400,10 @@ export default {
       window.localStorage.getItem("energy"),
       10
     );
-   
+
     // 获取上一次选择商家的id
     var CurShopId = this.restaurantId;
-    if (CurShopId === null || CurShopId ===undefined ||CurShopId ==='') {
+    if (CurShopId === null || CurShopId === undefined || CurShopId === "") {
       this.currShopId = "";
     } else {
       this.currShopId = CurShopId;
@@ -407,15 +411,26 @@ export default {
     }
     // 获取商家列表
     this.getShopList();
-
   },
   computed: {
     ...mapState(["restaurantId"]),
     options() {
       return { click: false, stopPropagation: true, bounce: false };
+    },
+    formatOrderDate() {
+      let formatDate = ''
+      if(this.sm_sti_serverTimeList.length){
+        const date =  this.sm_sti_serverTimeList[this.selectShopDateIndex].orderDate;
+        const week = this.sm_sti_serverTimeList[this.selectShopDateIndex].week;
+        formatDate =`${date} ${week}`
+      }
+      return formatDate;
     }
   },
   methods: {
+    onScrollHandle() {
+      console.log(111);
+    },
     // 获取商家列表
     getShopList() {
       var $this = this;
@@ -426,7 +441,11 @@ export default {
             $this.sm_shopList = cateringShop;
             // 判断商家类别并默认选中商家，默认选中上一次选中的商家，若没有选中的，则默认显示第一条
             var chooseSId = this.restaurantId;
-            if (chooseSId === null|| chooseSId ===undefined ||chooseSId ==='') {
+            if (
+              chooseSId === null ||
+              chooseSId === undefined ||
+              chooseSId === ""
+            ) {
               $this.currShopId = cateringShop[0].shopId;
               this.switchShopId = cateringShop[0].shopId;
             } else {
@@ -438,8 +457,9 @@ export default {
                   if ($this.sm_shopInfo.dateList.length < 2) {
                     $this.sm_sti_show = false;
                   }
-                  $this.shop_select_time =
-                    $this.sm_shopInfo.dateList[0].orderDate;
+                  this.selectShopDateIndex = 0;
+                  // 加载预定日期列表
+                  this.sm_sti_serverTimeList = this.formatDate(item.dateList);
                   $this.shopRepastInfo();
                 }
               });
@@ -468,7 +488,10 @@ export default {
       this.sm_shopList.forEach(item => {
         if (item.shopId === this.currShopId) {
           this.sm_shopInfo = item;
-          this.shop_select_time = item.dateList[0].orderDate;
+          // 默认选中第一个日期 ，初始化加载当天的信息
+          this.selectShopDateIndex = 0;
+          // 加载预定日期列表
+          this.sm_sti_serverTimeList = this.formatDate(item.dateList);
         }
       });
       this.shopRepastInfo();
@@ -476,10 +499,29 @@ export default {
       this.sm_si_shop_price = 0;
       this.sm_totalPogress_pre = "0%";
     },
+    // 日期格式化
+    formatDate(data) {
+      var weekDay = [
+        "星期日",
+        "星期一",
+        "星期二",
+        "星期三",
+        "星期四",
+        "星期五",
+        "星期六"
+      ];
+
+      return data.map(item => {
+        return {
+          orderDate: item.orderDate,
+          week: weekDay[new Date(item.orderDate).getDay()]
+        };
+      });
+    },
     // 关闭选择的商家
     sm_chooseShop_close() {
       this.sm_shopList_overlay = false;
-      this.switchShopId = this.currShopId
+      this.switchShopId = this.currShopId;
     },
     // 查看服务时间
     sm_bi_contTime() {
@@ -490,8 +532,10 @@ export default {
     },
     // 加载商家餐次信息
     shopRepastInfo() {
-      // 商家信息
-      getRepastList(this.sm_shopInfo.shopId, this.shop_select_time)
+      // 当前下单日期
+      const orderDate = this.sm_sti_serverTimeList[this.selectShopDateIndex]
+        .orderDate;
+      getRepastList(this.sm_shopInfo.shopId, orderDate)
         .then(res => {
           if (res.result === "0") {
             let data = res.data;
@@ -538,18 +582,15 @@ export default {
 
     // 切换订餐日期
     sm_stiReserve() {
-      var $this = this;
-
-      $this.sm_sti_serverTimeList = $this.sm_shopInfo.dateList;
-      console.log($this.sm_sti_serverTimeList);
-      $this.sm_sti_overlay = true;
+      // this.sm_sti_serverTimeList = this.sm_shopInfo.dateList;
+      this.sm_sti_overlay = true;
     },
     // 关闭 切换订餐日期  遮罩层
     sm_sti_overlay_contM_close_img_close() {
       this.sm_sti_overlay = false;
     },
     // 选择新的订餐时间
-    sm_chooseResverTime(time) {
+    sm_chooseResverTime(index) {
       var $this = this;
       this.$dialog
         .confirm({
@@ -557,8 +598,7 @@ export default {
           message: "更改订单时间，购物车数据将清空"
         })
         .then(() => {
-          // on confirm
-          $this.shop_select_time = time;
+          this.selectShopDateIndex = index;
           $this.sm_sti_overlay = false;
           $this.shopRepastInfo();
           $this.sm_si_shop_num = 0;
@@ -589,11 +629,14 @@ export default {
     },
     // 获取菜谱数据
     getShopMenuList() {
-      getMenuList(this.sm_shopInfo.shopId, this.shop_select_time)
+      // 当前下单日期
+      const orderDate = this.sm_sti_serverTimeList[this.selectShopDateIndex]
+        .orderDate;
+      getMenuList(this.sm_shopInfo.shopId, orderDate)
         .then(res => {
           if (res.result === "0") {
             let data = res.data;
-            this.$store.commit("RECORD_COOKBOOK_ID",data.cookbookId);
+            this.$store.commit("RECORD_COOKBOOK_ID", data.cookbookId);
             for (var i = 0; i < data.menuList.length; i++) {
               data.menuList[i].num = 0;
               data.menuList[i].id = i + 1;
@@ -656,7 +699,7 @@ export default {
           return;
         }
         if ($this.sm_fi_menulist[i].id === id) {
-          console.log($this.sm_fi_menulist[i].num)
+          console.log($this.sm_fi_menulist[i].num);
           $this.sm_fi_menulist[i].num++;
         }
       }
@@ -673,7 +716,6 @@ export default {
       }
       // 处理submit信息
       $this.sm_subPanel();
-
     },
     // 处理submit信息
     sm_subPanel() {
@@ -758,13 +800,15 @@ export default {
     },
     // 去结算
     sm_submit() {
-      console.log(11)
       var $this = this;
       if ($this.sm_si_shop_num > 0) {
-        this.$store.commit('RECORD_ORDERDATE',this.shop_select_time)
-        this.$store.commit('RECORD_MENULIST',this.sm_fi_menulist)
+        const orderDate = this.sm_sti_serverTimeList[this.selectShopDateIndex]
+          .orderDate;
+        this.$store.commit("RECORD_ORDERDATE", orderDate);
+        this.$store.commit("RECORD_MENULIST", this.sm_fi_menulist);
         this.$router.push({
-          name: "Ssubmit",params:{shopId:this.restaurantId}
+          name: "Ssubmit",
+          params: { shopId: this.restaurantId }
         });
       }
     },
@@ -838,9 +882,8 @@ export default {
                 $this.sm_fi_menulist[i].num * $this.sm_fi_menulist[i].carbohydr;
             }
             $this.sm_spppn_acjcal = actEnergy.toFixed(2); // 实际的能量
-           
-            $this.sm_spppn_acjcal_pro =
-              (actEnergy * 95) / data.energy + "%";
+
+            $this.sm_spppn_acjcal_pro = (actEnergy * 95) / data.energy + "%";
 
             var actDBZP = ((actDBZ / (actDBZ + actZF + actTS)) * 100).toFixed(
               2
@@ -856,17 +899,9 @@ export default {
             // sm_s_finT: '0%'  carbohydr
             //
             var fd =
-              (data.protein /
-                (data.protein +
-                  data.fat +
-                  data.carbohydr)) *
-              100;
+              (data.protein / (data.protein + data.fat + data.carbohydr)) * 100;
             var fz =
-              (data.fat /
-                (data.protein +
-                  data.fat +
-                  data.carbohydr)) *
-              100;
+              (data.fat / (data.protein + data.fat + data.carbohydr)) * 100;
             $this.sm_finD = fd + "%";
             $this.sm_finZ = fz + "%";
             $this.sm_finT = 100 - fz - fd + "%";
@@ -877,11 +912,17 @@ export default {
         });
     }
   },
+  watch: {},
   destroyed() {},
-  mounted() {}
+  mounted() {
+    // this.$nextTick(() => {
+    //   let wrapper = document.querySelector("#shopscroll");
+    //   let scroll = new BScroll(wrapper);
+    // });
+  }
 };
 </script>
 
-<style scoped>
-@import "../../common/styles/market.css";
+<style lang="stylus">
+@import '../../common/styles/market.css';
 </style>

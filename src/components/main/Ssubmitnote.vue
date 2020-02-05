@@ -16,20 +16,25 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
 export default {
   data() {
     return {
       message: ""
     };
   },
-  
+  computed: {
+    ...mapState(["remarkText"])
+  },
+  created(){
+    this.message = this.remarkText
+  },
   methods: {
     confirm() {
-      this.$store.commit("CONFIRM_REMARK",this.message)
-      this.$router.go(-1)
+      this.$store.commit("CONFIRM_REMARK", this.message);
+      this.$router.go(-1);
     }
   }
-  
 };
 </script>
 
@@ -40,10 +45,9 @@ export default {
   margin-left: 18px;
   border: 1px solid #efefef;
 }
- .van-field__control{
+.van-field__control {
   height: 40vh !important;
-
- }
+}
 .ssn_btn {
   margin-top: 18px;
   width: calc(100% - 38px);

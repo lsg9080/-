@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="container">
     <div class="ss">
       <!-- 地址 -->
       <div class="ss_distri" @click="ss_distriInfo">
@@ -83,7 +83,8 @@
                 :key="index"
                 @click="ss_choosepayMethod(item.paymentName,item.paymentId)"
               >
-                <van-radio slot="right-icon" :name="item.paymentId" />
+                <img slot="icon" :src="item.icon" class="van-icon van-cell__left-icon" />
+                <van-radio slot="right-icon" :name="item.paymentId" checked-color="#1aad19"></van-radio>
               </van-cell>
             </van-cell-group>
           </van-radio-group>
@@ -200,15 +201,27 @@ export default {
       getPaymentList(this.ss_shopid)
         .then(res => {
           if (res.result === "0") {
+            let data = res.data;
             if (this.cardId == "") {
               // 没有职工卡号，剔出职工卡支付
               res.data = res.data.filter(function(item) {
                 return item.paymentId != 1;
               });
             }
-            $this.ss_paymethod_list = res.data;
-            $this.ss_paymethod_list_chooseId = res.data[0].paymentId;
-            $this.ss_paymethod_list_chooseName = res.data[0].paymentName;
+            let newData = data.map(item => {
+              if (item.paymentId == 1) {
+                item.icon = require("../../assets/Smain/pay_staffcard.png");
+              } else if (item.paymentId == 2) {
+                item.icon = require("../../assets/Smain/pay_cash.png");
+              } else {
+                item.icon = require("../../assets/Smain/pay_wechat.png");
+              }
+              return item;
+            });
+
+            $this.ss_paymethod_list = newData;
+            $this.ss_paymethod_list_chooseId = newData[0].paymentId;
+            $this.ss_paymethod_list_chooseName = newData[0].paymentName;
           } else {
             $this.$toast({
               message: res.msg,
@@ -362,21 +375,37 @@ export default {
             const item = dist.findIndex(
               item => item.districtId === this.ss_distri_id
             );
+            if (item != -1) {
+              buildArr = dist[item].buildingList;
+            } else {
+              this.scope = false;
+              this.$toast({
+                message: "不在配送范围内！",
+                forbidClick: true,
+                duration: 3000
+              });
+              return;
+            }
             // 楼号
             const itemB = buildArr.findIndex(
               item => item.buildingId === this.ss_build_id
             );
+            if (itemB != -1) {
+              floorArr = buildArr[itemB].floorList;
+            } else {
+              this.scope = false;
+              this.$toast({
+                message: "不在配送范围内！",
+                forbidClick: true,
+                duration: 3000
+              });
+              return;
+            }
             // 楼层
-            console.log(floorArr);
             const itemF = floorArr.findIndex(
               itemF => itemF.floorId === this.ss_floor_id
             );
-
-            if (item >= 0) {
-              buildArr = dist[item].buildingList;
-            } else if (itemB >= 0) {
-              floorArr = buildArr[itemB].floorList;
-            } else if (itemF >= 0) {
+            if (itemF != -1) {
               console.log("地址再配送范围之内，可以配送");
               this.scope = true;
             } else {
@@ -504,7 +533,6 @@ export default {
           }
         })
         .catch(() => {
-          // on cancel
           // this.disabled = false;
           console.log("cancel");
         });
@@ -563,6 +591,7 @@ export default {
 
     getWXPrepayid(params) {
       let price = this.ssTotalPrice ? this.ssTotalPrice : 0.01;
+
       //获取当前的日期yy-mm-dd hh:mm:ss
       let callTime = formatDate(new Date(), "yyyy-MM-dd hh:mm:ss"),
         currentDate = formatDate(new Date(), "yyyyMMddhhmmss"),
@@ -635,17 +664,6 @@ export default {
         });
     },
     wechatPaySDK(wxOptions) {
-      /**
-       * prepay_id: "wx10183618537375bdc6483fea1794844000"
-appId: "wxcf2261853abfc265"
-timeStamp: "1578652578"
-nonceStr: "2870CDFBFDCAD08B530ADD463788D92B"
-package: "prepay_id=wx10183618537375bdc6483fea1794844000"
-paySign: "0C97952B2C3B38499078F09CE51453C6"
-payId: "WX20200110183618765311926182"
-tradeId: null
-orderCode: "WX202001101836187653"
-       */
       let opt = {
         signType: "MD5"
       };
@@ -659,13 +677,27 @@ orderCode: "WX202001101836187653"
           this.$router.push({ name: "OrderCallback" });
         },
         () => {
-          this.$router.push({ name: "Sorder" });
+          this.$toast("支付失败");
+          setTimeout(() => {
+            this.$router.push({ name: "Sorder" });
+          }, 1000);
         }
       );
     }
   },
   activated() {
     this.getStaffInfo();
+  },
+
+  /**
+   * 1.去到备注页，则保存备注内容
+   * 2.离开下单页，则清空备注内容
+   */
+  beforeRouteLeave(to, from, next) {
+    if (to.name != "Ssubmitnote") {
+      this.$store.commit("CONFIRM_REMARK", "");
+    }
+    next();
   }
 };
 </script>
@@ -674,6 +706,7 @@ orderCode: "WX202001101836187653"
 body {
   line-height: 1.4;
 }
+
 .ss {
   width: calc(100% - 9px - 9px);
   height: calc(100vh - 45px - 9px);
@@ -885,7 +918,9 @@ body {
 }
 .ss_paympop_panel_panel_cell {
   font-size: 16px;
-  height: 50px;
-  line-height: 50px;
+  padding: 15px;
+}
+.ss_paympop_panel_panel_cell span {
+  vertical-align: middle;
 }
 </style>

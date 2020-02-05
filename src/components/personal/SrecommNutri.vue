@@ -57,7 +57,6 @@ export default {
   // 自执行
   created: function () {
     // 获取营养推荐
-    // this.$route.query.id
     this.srn_reduceWeight = this.$route.query.reduceWeight
     this.srn_sex = this.$route.query.sex
     this.srn_age = this.$route.query.age

@@ -2,13 +2,21 @@
   <div>
     <div class="od_pay">
       <div class="od_pay_statusName">{{statusName}}</div>
-      <div  class="o_wrap_status">
-        <button v-if="status==2" class="o_wrap_status_cancel_order" @click="cancelOrder(orderId)">取消订单</button>
+      <div class="o_wrap_status">
+        <button
+          v-if="status==2"
+          class="o_wrap_status_cancel_order"
+          @click="cancelOrder(orderId)"
+        >取消订单</button>
         <button v-if="status==2" class="o_wrap_status_pay_order" @click="payOrder">
           去支付(剩余
-          <van-count-down :time="countdown" format="mm:ss" @finish="refundOrder(orderId)"/>)
+          <van-count-down :time="countdown" format="mm:ss" @finish="refundOrder(orderId)" />)
         </button>
-        <button v-if="status==3||status==4" class='o_wrap_status_cancel_order' @click='refundOrder(orderId)'>在线退餐</button>
+        <button
+          v-if="status==3||status==4"
+          class="o_wrap_status_cancel_order"
+          @click="refundOrder(orderId)"
+        >在线退餐</button>
         <div class="clearBoth"></div>
       </div>
     </div>
@@ -40,7 +48,10 @@
 
     <div class="od_delivery">
       <div class="od_delivery_title">配送信息</div>
-      <div class="od_delivery_address">地址：{{addressAll}}</div>
+      <div class="od_delivery_address">
+        <div class="label">地址：</div>
+        <div class="info">{{addressAll}}</div>
+      </div>
       <div>{{staffName}} {{telephone}}</div>
     </div>
 
@@ -65,17 +76,21 @@
 </template>
 
 <script>
-import { orderCancel, orderPaid, getOrderDetail, getPrepayid ,orderRefund} from "@/serve"; //
+import {
+  orderCancel,
+  orderPaid,
+  getOrderDetail,
+  getPrepayid,
+  orderRefund
+} from "@/serve"; //
 import payUtils from "@/common/js/wechat";
 import { wechatAppId } from "@/config/auth";
 import { encryptDes } from "@/common/js/utils"; //encryptionPay,
 import { formatDate } from "@/getParams";
-let timer = null;
 export default {
   data() {
     return {
       amount: 0, // 总额
-      payId: "",
       shopId: "",
       addressAll: "",
       telephone: "",
@@ -93,12 +108,18 @@ export default {
       validTime: "", //订单剩余时间
       orderId: "",
       countdown: 0,
-      goods:null
+      goods: null,
+      routePayId: ""
     };
   },
-  // 自执行
+  /**
+   * 接口中不返回 payId,从上一个页面中获取参数
+   * 由于接口返回的 orderCode WX202001171502044919 有些店铺调用该接口不能返回prepay_id
+   * 所以统一使用下单时传入的 orderCode 参数值
+   */
   created: function() {
     this.orderId = this.$route.params.orderId;
+    this.routePayId = this.$route.params.payId;
     this.init();
   },
 
@@ -109,7 +130,6 @@ export default {
           let data = res.data;
           let obj = {
             amount: 0, // 总额
-            payId: "",
             shopId: "",
             addressAll: "",
             telephone: "",
@@ -160,25 +180,17 @@ export default {
           .then(res => {
             if (res.result == "0") {
               this.$toast({ message: "支付成功！" });
-              clearInterval(timer);
               this.init();
             } else {
               this.$toast.fail(res.msg);
-              setTimeout(function() {
-                clearInterval(timer);
-                this.init();
-              }, 2000);
+              this.init();
             }
           })
           .catch(() => {
             this.$toast.fail("支付失败！");
-            setTimeout(function() {
-              clearInterval(timer);
-              this.init();
-            }, 2000);
+            this.init();
           });
       } else {
-        var body = "订单消费" + this.amount + "元";
         var price = this.amount;
         price = parseFloat(price).toFixed(2);
 
@@ -186,6 +198,7 @@ export default {
         let currrentTime = formatDate(new Date(), "yyyy-MM-dd hh:mm:ss");
         var str = "wincome+" + currentDate + "+" + price;
         let amountEncrypt = encryptDes(str);
+        var body = "订单消费" + price + "元";
 
         let params = {
           authCode: "101FCC56AB9147F69E75AC7AAC52D2BB",
@@ -196,9 +209,10 @@ export default {
           price: price,
           paymentId: this.paymentId,
           amountEncrypt: amountEncrypt,
-          payId: this.payId,
-          orderCode: this.orderCode
+          payId: this.routePayId,
+          orderCode: this.routePayId.substr(2)
         };
+        console.log(params);
         getPrepayid(params).then(res => {
           if (res.result == "0") {
             let wxOptions = {
@@ -207,18 +221,16 @@ export default {
               package: res.package,
               paySign: res.paySign,
               prepay_id: res.prepay_id,
-              timeStamp: res.timeStamp,
-
-              orderCode: this.orderCode,
-              payId: this.payId
+              timeStamp: res.timeStamp
             };
             console.log("从后端取到的微信参数：" + JSON.stringify(wxOptions));
             if (res.prepay_id) {
-              payUtils.WxConfig(wxOptions);
               payUtils.WXJSApi(
                 wxOptions,
                 () => {
-                  this.$router.push({ name: "OrderCallback" });
+                  this.$toast("支付成功");
+                  this.init();
+                  // this.$router.push({ name: "OrderCallback" });
                 },
                 () => {
                   this.$toast("支付失败");
@@ -229,7 +241,7 @@ export default {
         });
       }
     },
-   
+
     goodsList() {
       //给餐次列表中添加 total 字段，记录每个餐次的总价
       for (var i = 0; i < this.repastList.length; i++) {
@@ -241,9 +253,9 @@ export default {
         }
         this.repastList[i].total = total.toFixed(2);
       }
-      this.goods = this.repastList.sort((a, b)=> {
-      return a.sortId - b.sortId;
-    });
+      this.goods = this.repastList.sort((a, b) => {
+        return a.sortId - b.sortId;
+      });
       console.log(this.goods);
     },
     /**
@@ -271,7 +283,7 @@ export default {
         }
       });
     },
-    refundOrder(id){
+    refundOrder(id) {
       orderRefund(id).then(res => {
         if (res.data.result == 0) {
           this.$toast({ message: res.data.note });
@@ -280,7 +292,7 @@ export default {
         }
         this.init();
       });
-    },
+    }
   }
 };
 </script>
@@ -451,11 +463,8 @@ body {
   margin-left: 10px;
   margin-top: 10px;
   border: 1px solid #e2e2e2;
-  padding-left: 10px;
-  padding-right: 10px;
-  font-size: 36rp;
-  /* height: 36px; */
-  line-height: 36px;
+  padding: 10px;
+  font-size: 18px;
 }
 
 .od_remark_title {
@@ -478,6 +487,16 @@ body {
   height: 36px;
   line-height: 36px;
   font-weight: bold;
+}
+
+.od_delivery_address {
+  display: flex;
+  word-break: break-all;
+  line-height: 1.4;
+}
+
+.od_delivery_address .info {
+  flex: 1;
 }
 
 .od_billNum {

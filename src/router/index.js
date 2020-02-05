@@ -104,7 +104,8 @@ export default new Router({
       path: '/ssubmitnote',
       name: 'Ssubmitnote',
       component: Ssubmitnote,
-      meta: { title: '个人备注', keepAlive: true }
+      meta: { title: '个人备注' }
+      // , keepAlive: true
     },
     {
       path: '/sorder',

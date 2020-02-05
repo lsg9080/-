@@ -87,7 +87,7 @@ export default {
     /**
      * 授权回调后的地址
      * http://ceshi.wincome.group/?code=071DQjed0w0uiz1hZPed0vAxed0DQjeR&state=123
-     *cd
+     *
      **/
     staffOpenid() {
       var soOpenid = this.openid;

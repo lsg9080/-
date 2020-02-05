@@ -17,7 +17,6 @@ import {
     Radio,
     Dialog,
     Lazyload,
-    IndexBar, IndexAnchor,
     List,
     Tag,
     CountDown
@@ -37,12 +36,6 @@ import {
   Vue.use(Radio)
   Vue.use(Dialog)
   Vue.use(Lazyload)
-  Vue.use(IndexBar).use(IndexAnchor);
   Vue.use(List)
   Vue.use(Tag)
   Vue.use(CountDown);
-
-
-  // import { ScrollNav,Scroll } from 'cube-ui';
-  // Vue.use(ScrollNav);
-  // Vue.use(Scroll);

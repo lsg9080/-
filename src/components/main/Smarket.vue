@@ -1,7 +1,7 @@
 <template>
   <div class="sm">
     <!-- business info -->
-    <section ref="header">
+    <section ref="header" class="page-hd">
       <div class="sm_bi">
         <div class="sm_bi_img">
           <img class="sm_bi_img_logo" :src="sm_shopInfo.logo" />
@@ -27,7 +27,7 @@
       <!-- select time info -->
       <div class="sm_sti" v-show="sm_sti_show">
         <img class="sm_sti_reserve" :src="sm_sti_reserve_icon" />
-        <label class="sm_sti_txt">{{sm_shop_select_time}}</label>
+        <label class="sm_sti_txt">{{shop_select_time}}</label>
         <img class="sm_sti_down" :src="sm_sti_down_icon" @click.self.stop="sm_stiReserve" />
         <div class="clearboth"></div>
       </div>
@@ -119,7 +119,7 @@
             <label>营养分析</label>
           </div>
         </div>
-        <div class="sm_spp_panel_data">{{sm_shop_select_time}}</div>
+        <div class="sm_spp_panel_data">{{shop_select_time}}</div>
         <div class="sm_spp_panel_list">
           <div v-if="sm_repast_un.length > 0">
             <div v-for="(itemRepast) in sm_repast_un" :key="itemRepast.repastId">
@@ -290,7 +290,7 @@ export default {
       currShopId: null,
       switchShopId: null,
       sm_shopInfo: {}, // 商家信息
-      sm_shop_select_time: "", // 当前时间
+      shop_select_time: "", // 当前时间
       sm_shop_select_repast: [], // 当前时间餐次数组
       sm_shop_serverTime: "", // 服务时间
       sm_sti_reserve_icon: require("../../assets/Smain/yudin.png"),
@@ -399,7 +399,7 @@ export default {
                   // if ($this.sm_shopInfo.dateList.length < 2) {
                   //   $this.sm_sti_show = false
                   // }
-                  $this.sm_shop_select_time =
+                  $this.shop_select_time =
                     $this.sm_shopInfo.dateList[0].orderDate;
                   $this.sm_shopRepastInfo();
                 }
@@ -432,7 +432,7 @@ export default {
       this.sm_shopList.forEach(item => {
         if (item.shopId === this.currShopId) {
           this.sm_shopInfo = item;
-          this.sm_shop_select_time = item.dateList[0].orderDate;
+          this.shop_select_time = item.dateList[0].orderDate;
         }
       });
       this.sm_shopRepastInfo();
@@ -468,7 +468,7 @@ export default {
     sm_shopRepastInfo() {
       var $this = this;
       // 商家信息
-      getRepastList(this.sm_shopInfo.shopId, this.sm_shop_select_time)
+      getRepastList(this.sm_shopInfo.shopId, this.shop_select_time)
         .then(res => {
           if (res.result === "0") {
             // 服务时间
@@ -534,7 +534,7 @@ export default {
           message: "更改订单时间，购物车数据将清空"
         })
         .then(() => {
-          $this.sm_shop_select_time = time;
+          $this.shop_select_time = time;
           $this.sm_sti_overlay = false;
           $this.sm_shopRepastInfo();
           $this.sm_si_shop_num = 0;
@@ -552,7 +552,7 @@ export default {
     },
     // 获取菜谱数据
     getShopMenuList() {
-      getMenuList(this.sm_shopInfo.shopId, this.sm_shop_select_time)
+      getMenuList(this.sm_shopInfo.shopId, this.shop_select_time)
         .then(res => {
           if (res.result === "0") {
             let data = res.data;
@@ -718,8 +718,7 @@ export default {
     },
     // 去结算
     sm_submit() {
-      var $this = this;
-      if ($this.sm_si_shop_num > 0) {
+      if (this.sm_si_shop_num > 0) {
         this.$store.commit('RECORD_ORDERDATE',this.shop_select_time)
         this.$store.commit("RECORD_MENULIST", this.sm_fi_menulist);
         this.$router.push({

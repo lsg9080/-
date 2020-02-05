@@ -26,6 +26,7 @@ export default {
 
     //记录订单页面用户选择的备注, 传递给订单确认页面
 	CONFIRM_REMARK(state,info) {
+        console.log(info)
 		state.remarkText = info;
 	},
 

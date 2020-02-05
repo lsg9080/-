@@ -31,14 +31,7 @@ export default {
     },
     //shopCart变化的时候重新计算当前商品的数量
     foodNum: function() {
-      let category_id = this.food.goods_category_id;
-      let food_id = this.food.id;
-
-      if (
-        this.shopCart &&
-        this.shopCart[category_id] &&
-        this.shopCart[category_id][food_id]
-      ) {
+      if (this.shopCart && this.shopCart[this.food.id]) {
         return this.shopCart[category_id][food_id].num;
       } else {
         return 0;
@@ -51,39 +44,19 @@ export default {
     //移出购物车
     removeOutCart(event) {
       event.stopPropagation();
-
       if (this.foodNum > 0) {
-        const food = this.food;
-        const addInfo = {
-          shopid: this.shopId,
-          category_id: food.goods_category_id,
-          food_id: food.id,
-          name: food.name,
-          favorable_price: food.favorable_price,
-          price: food.price
-        };
-        this.$store.commit("REDUCE_CART", addInfo);
+        this.$store.commit("REDUCE_CART", this.food);
       }
     },
     //加入购物车，计算按钮位置。
     addToCart(event) {
       event.stopPropagation();
-      const food = this.food;
-      const addInfo = {
-        shopid: this.shopId,
-        category_id: food.goods_category_id,
-        food_id: food.id,
-        name: food.name,
-        favorable_price: food.favorable_price,
-        price: food.price
-      };
-      this.$store.commit("ADD_CART", addInfo);
+      this.$store.commit("ADD_CART", this.food);
     }
   }
 };
 </script>
 
 <style scoped>
-
 </style>
 

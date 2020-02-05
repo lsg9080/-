@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="container">
     <div v-if="!so_noOrder" class="so">
       <van-list v-model="loading" :finished="finished" finished-text="没有更多了" @load="loadMore">
         <!-- <van-cell v-for="item in orderList" :key="item">{{item}}</van-cell> -->
@@ -68,7 +68,7 @@ import {
   orderPaid,
   getPrepayid,
   orderRefund
-} from "@/serve"; //
+} from "@/serve";
 import payUtils from "@/common/js/wechat";
 import { encryptDes } from "@/common/js/utils";
 import { wechatAppId } from "@/config/auth";
@@ -87,7 +87,7 @@ export default {
   methods: {
     loadMore() {
       this.pageNum += 1;
-      this.loadOrder();
+      this.loadOrder(this.pageSize, this.pageNum);
     },
     orderDetail(orderId, payId) {
       this.$router.push({
@@ -98,38 +98,37 @@ export default {
         }
       });
     },
-    loadOrder() {
-      getOrderList(this.pageSize, this.pageNum)
+    loadOrder(pageSize, pageNum) {
+      getOrderList(pageSize, pageNum)
         .then(res => {
-          console.log(res.data);
           if (res.data.result === "0") {
             if (res.data.data.length == 0) {
-              // 数据全部加载完成
-              this.finished = true;
-              this.so_noOrder = this.pageNum === 0 ? true : false;
+              // 暂无数据
+              this.so_noOrder = pageNum === 0 ? true : false;
             } else {
-              if (this.pageNum == 0) {
+              if (pageNum == 0) {
                 this.orderList = res.data.data;
               } else {
                 this.orderList = this.orderList.concat(res.data.data);
               }
               // 限时订单 倒计时
-                this.orderList.forEach(item => {
-                  if (item.status == 2) {
-                    this.cuntDown(item);
-                  }
-                });
+              this.orderList.forEach(item => {
+                if (item.status == 2) {
+                  this.cuntDown(item);
+                }
+              });
             }
+
             this.loading = false;
+            // 数据全部加载完成
+            if (res.data.data.length < pageSize) {
+              this.finished = true;
+            }
           } else {
             this.loading = false;
             this.finished = true;
             this.$toast({ message: res.msg });
           }
-          // 加载状态结束
-          setTimeout(() => {
-            this.loading = false;
-          }, 1000);
         })
         .catch(() => {
           this.loading = false;
@@ -150,7 +149,6 @@ export default {
         order.left_time = time;
       } else {
         //超时，订单自动取消
-        console.log("超时");
         this.cancelOrder(order.orderId);
       }
     },
@@ -163,12 +161,14 @@ export default {
       orderCancel(id).then(res => {
         if (res.data.result == 0) {
           this.$toast({ message: res.data.note });
-          this.loadOrder(this.pageSize, 0);
         } else {
           this.$toast({ message: res.msg });
         }
+        this.pageNum = 0
+        this.loadOrder(this.pageSize,this.pageNum);
       });
     },
+    // 在线退餐
     refundOrder(id) {
       orderRefund(id).then(res => {
         if (res.data.result == 0) {
@@ -176,11 +176,21 @@ export default {
         } else {
           this.$toast({ message: res.msg });
         }
-        this.loadOrder(this.pageSize, 0);
+        this.pageNum = 0
+        this.loadOrder(this.pageSize,this.pageNum);
       });
     },
+    /**
+     * 方法名：getPrepayid
+     *
+     * payId:     pioc87c3-1579244520513-81969
+     * orderCode:  oc87c3-1579244520513-81969
+     * body:      金额一定是两位小数
+     * price:     金额一定是两位小数
+     * 由于接口返回的 orderCode WX202001171502044919 有些店铺调用该接口不能返回prepay_id
+     * 所以统一使用下单时传入的 orderCode 参数值
+     */
     payOrder(item) {
-      console.log(item);
       if (item.paymentId == 1) {
         orderPaid(item.orderId).then(res => {
           if (res.result == "0") {
@@ -194,7 +204,6 @@ export default {
           }
         });
       } else {
-        var body = "订单消费" + item.amount + "元";
         var price = item.amount;
         price = parseFloat(price).toFixed(2);
 
@@ -202,6 +211,7 @@ export default {
         let currrentTime = formatDate(new Date(), "yyyy-MM-dd hh:mm:ss");
         var str = "wincome+" + currentDate + "+" + price;
         let amountEncrypt = encryptDes(str);
+        let body = "订单消费" + price + "元";
 
         let params = {
           authCode: "101FCC56AB9147F69E75AC7AAC52D2BB",
@@ -212,9 +222,10 @@ export default {
           price: price,
           paymentId: item.paymentId,
           payId: item.payId,
-          orderCode: item.orderCode,
+          orderCode: item.payId.substr(2),
           amountEncrypt: amountEncrypt
         };
+        console.log(params);
 
         getPrepayid(params).then(res => {
           if (res.result == "0") {
@@ -231,7 +242,6 @@ export default {
             };
             console.log("从后端取到的微信参数：" + JSON.stringify(wxOptions));
             if (res.prepay_id) {
-              payUtils.WxConfig(wxOptions);
               payUtils.WXJSApi(
                 wxOptions,
                 () => {
@@ -253,6 +263,10 @@ export default {
 </script>
 
 <style scoped>
+.container{
+  background: #fff;
+}
+
 .van-count-down {
   font-size: 0.48rem;
   color: #8db0d0;

@@ -1,4 +1,12 @@
 
+.scroll-list-inner-wrap{
+  height: 100px;
+  background: #fff;
+  overflow: hidden;
+}
+.page-hd{
+  background: #fff;
+}
 .sm {
   width: 100%;
   overflow: hidden;
@@ -440,7 +448,7 @@
   width: 16px;
   height: 16px;
   float: left;
-  margin-top: 4px;
+  margin: 4px;
 }
 .sm_spp_panel_ev_nutri label {
   display: inline-block;
@@ -448,7 +456,7 @@
   line-height: 26px;
 }
 .sm_spp_panel_data {
-  font-size: 12px;
+  font-size: 14px;
   height: 26px;
   line-height: 26px;
   width: 100%;
@@ -474,7 +482,6 @@
   margin-top: 10px;
   display: inline-block;
   padding:0 8px;
-  /* padding: 0.18775px 0.93775px 0 0.93775px; */
 }
 .sm_spp_pl_item {
   width: 100%;
@@ -544,7 +551,7 @@
   height: 34px;
   line-height: 34px;
   width: calc(100% - 18px - 3px);
-  padding: 10px 0 4px 0;
+  padding: 4px 10px;
 }
 .sm_spppn_pxline {
   width: 100%;
@@ -690,10 +697,12 @@
 }
 .sm_shopList_overlayCont_shoplist_cont {
   height: calc(45vh - 60px - 1px - 36px - 10px - 10px);
+  min-height: calc(45vh - 60px - 1px - 36px - 10px - 10px);
   background: none;
   width: 100%;
   overflow: hidden;
   overflow-y: auto;
+  -webkit-overflow-scrolling:touch;
 }
 .sm_slolcslc_item {
   width: calc(100% - 30px);
