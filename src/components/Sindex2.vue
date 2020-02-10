@@ -27,6 +27,10 @@
 </template>
 
 <script>
+/**
+ * 通过微信授权获取openid
+ */
+
 import { getStaffInfo, getOpenid } from "@/serve";
 import { urlQueryParams, encryption } from "../getParams.js";
 import { mapState } from "vuex";
@@ -85,60 +89,42 @@ export default {
   },
   methods: {
     /**
-     * 是否有微信
-     * 1、没有微信：
-     *        地址中攜帶staff，直接代入住院号当作openid
-     * 2、有微信：微信网页授权回调后的地址
+     * 授权回调后的地址
      * http://ceshi.wincome.group/?code=071DQjed0w0uiz1hZPed0vAxed0DQjeR&state=123
      *
      **/
     staffOpenid() {
-      console.log(111)
-      var queryParams = urlQueryParams(window.location.href);
-        var staff = queryParams.staff;
+      var soOpenid = this.openid;
+      if (soOpenid == null) {
+        var queryParams = urlQueryParams(window.location.href);
         var opencode = queryParams.code;
-      if (this.openid) {
-        
-        if (staff) {
-          this.$store.commit("RECORD_OPENID",staff );
-          this.si_overlay = false;
-        }else{
-          this.$store.commit("RECORD_OPENID", this.openid);
-          this.si_overlay = false;
+        if (opencode === "" || opencode == undefined || opencode == null) {
+          // 通过Aauth2 进行微信授权，获取openid
+          window.location.href =
+            "https://open.weixin.qq.com/connect/oauth2/authorize?appid=" +
+            wechatAppId +
+            "&redirect_uri=" +
+            homePage +
+            "&response_type=code&scope=snsapi_base&state=123#wechat_redirect";
+        } else {
+          let authCode = encryption("wincome", 230);
+          getOpenid(authCode, opencode)
+            .then(data => {
+              console.log(data);
+              if (data.result == 0) {
+                this.$store.commit("RECORD_OPENID", data.openid);
+                console.log("openid||" + data.openid);
+              }
+              this.si_overlay = false;
+            })
+            .catch(err => {
+              console.log(err);
+              this.si_overlay = false;
+            });
         }
-      
-      }else{
- 
-        if (staff) {
-          this.$store.commit("RECORD_OPENID",staff );
-          this.si_overlay = false;
-        }else{
-          
-          if (opencode === "" || opencode == undefined || opencode == null) {
-            // 通过Aauth2 进行微信授权，获取openid
-            window.location.href =
-              "https://open.weixin.qq.com/connect/oauth2/authorize?appid=" +
-              wechatAppId +
-              "&redirect_uri=" +
-              homePage +
-              "&response_type=code&scope=snsapi_base&state=123#wechat_redirect";
-          } else {
-            let authCode = encryption("wincome", 230);
-            getOpenid(authCode, opencode)
-              .then(data => {
-                console.log(data);
-                if (data.result == 0) {
-                  this.$store.commit("RECORD_OPENID", data.openid);
-                  console.log("openid||" + data.openid);
-                }
-                this.si_overlay = false;
-              })
-              .catch(err => {
-                console.log(err);
-                this.si_overlay = false;
-              });
-          } 
-        }
+      } else {
+        this.$store.commit("RECORD_OPENID", this.openid);
+        this.si_overlay = false;
       }
     },
 

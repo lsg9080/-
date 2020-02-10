@@ -7,6 +7,9 @@
     fetch(key) {
         return JSON.parse(sessionStorage.getItem(key)) || [];
     },
+    clear() {
+        sessionStorage.clear();
+    }
   };
   
   export const localstorage = {
