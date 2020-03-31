@@ -105,17 +105,18 @@ import {
 } from "@/serve";
 import payUtils from "@/common/js/wechat";
 import { encryptDes } from "@/common/js/utils";
-import { wechatAppId } from "@/config/auth";
+import { wechatAppId } from "@/config/env";
 import { formatDate } from "@/getParams";
 import { mapState } from "vuex";
 
 let vm;
 /**
  * 支付方式分 4种；
- * 1. 职工卡支付   paymentId：1      tempOrder：1
- * 2. 到付        paymentId：2      tempOrder：1
- * 3. 微信支付    paymentId：3      tempOrder：2
- * 6.一卡通支付   paymentId：6      tempOrder：1
+ * 1. 职工卡支付       paymentId：1      tempOrder：1
+ * 2. 到付            paymentId：2      tempOrder：1
+ * 3. 微信支付        paymentId：3      tempOrder：2
+ * 6.一卡通支付       paymentId：6      tempOrder：1
+ * 7.雄伟一卡通支付   paymentId：7      tempOrder：1
  *
  * tips:
  * tempOrder  2：临时订单(微信支付)； 1：正常订单
@@ -202,9 +203,9 @@ export default {
         .then(res => {
           if (res.result === "0") {
             let data = res.data;
-            if (this.cardId == "") {
+            if ($this.cardId == "") {
               // 没有职工卡号，剔出职工卡支付
-              res.data = res.data.filter(function(item) {
+              data = data.filter(function(item) {
                 return item.paymentId != 1;
               });
             }
@@ -298,7 +299,8 @@ export default {
             $this.ss_floor_id = data.floorId;
             $this.ss_floor_name = data.floorName;
             $this.ss_address = data.address ? data.address : "";
-            $this.ss_mobile = data.mobile;
+            $this.ss_mobile = data.mobile == null ? "" : data.mobile;
+
             this.deptId = data.deptId;
             this.deptName = data.deptName;
             this.cardId = data.cardId;
@@ -369,6 +371,19 @@ export default {
           if (res.result === "0") {
             this.deliveryScope = res.data;
             var dist = res.data; // 区域数组
+            // dist = [{
+            //   buildingList: [{
+            //     floorList: [
+            //       { floorId: 65, floorName: "1层" },
+            //       { floorId: 66, floorName: "2层" },
+            //       { floorId: 67, floorName: "3层" }
+            //     ],
+            //     buildingId: 24,
+            //     buildingName: "五号楼"
+            //   }],
+            //   districtId: 9,
+            //   districtName: "中心区"
+            // }];
             var buildArr = [];
             var floorArr = [];
             // 区域
@@ -406,7 +421,7 @@ export default {
               itemF => itemF.floorId === this.ss_floor_id
             );
             if (itemF != -1) {
-              console.log("地址再配送范围之内，可以配送");
+              console.log("地址在配送范围之内，可以配送");
               this.scope = true;
             } else {
               this.scope = false;
@@ -422,27 +437,62 @@ export default {
               forbidClick: true,
               duration: 3000
             });
-            // this.disabled = false;
           }
         })
         .catch(err => {
-          // this.disabled = false;
           console.log(err);
         });
     },
-    // 提交订单钱判断
-    ss_submitOrder() {
-      if (this.scope) {
-        this.ss_orderParam();
-      } else {
+    // 提交订单前判断
+    async ss_submitOrder() {
+      // 1、若后台将配送地址设为不配送，则提示
+      this.getDeliveryScope();
+
+      if (!this.scope) {
         this.$toast({
           message: "不在配送范围内！",
           forbidClick: true,
           duration: 3000
         });
+        return;
       }
+      // 2、若后台取消支付方式的勾选，则提示
+      let payments = await getPaymentList(this.ss_shopid);
+      if (payments.result === "0") {
+        let data = payments.data;
+        if (this.cardId == "") {
+          // 没有职工卡号，剔出职工卡支付
+          data = data.filter(function(item) {
+            return item.paymentId != 1;
+          });
+        }
+        // data = [{ kind: 0, paymentId: 3, paymentName: "微信支付" }];
+        var payment = data.findIndex(item => {
+          return item.paymentId == this.ss_paymethod_list_chooseId;
+        });
+        if (payment == -1) {
+          this.$toast({
+            message: "请选择其他支付方式！",
+            forbidClick: true,
+            duration: 3000
+          });
+          this.paymeth()
+          return;
+        }
+      }
+
+      // 3、若绑定方式通过自动绑定（url携带职工卡号作为openid，则自动登录），则手机号强验证
+      if (!this.ss_mobile) {
+        this.$toast({
+          message: "请填写正确的手机号！",
+          forbidClick: true,
+          duration: 3000
+        });
+        return;
+      }
+      this.ss_orderParam();
     },
-    // 订单参数
+    // 根据订单参数，选择支付类型
     ss_orderParam() {
       var timestamp = new Date().getTime(); // 当前的时间戳
       timestamp = timestamp + 30 * 60 * 1000;
@@ -517,15 +567,13 @@ export default {
             "已选择" + vm.ss_paymethod_list_chooseName + "方式，确认提交订单?"
         })
         .then(() => {
-          // 微信支付：3  到付：2  职工卡支付：1 一卡通支付：6
-          if (this.ss_paymethod_list_chooseId === 3) {
+          // 微信支付：3  到付：2  职工卡支付：1 一卡通支付：6   雄伟一卡通支付：7
+          let p = this.ss_paymethod_list_chooseId;
+          if (p === 3) {
             // 微信支付
             this.wechatPay(params);
-          } else if (this.ss_paymethod_list_chooseId === 1) {
+          } else if (p == 1 || p == 6 || p == 7) {
             // 职工卡支付
-            this.empCarPay(params);
-          } else if (this.ss_paymethod_list_chooseId === 6) {
-            // 一卡通支付
             this.empCarPay(params);
           } else {
             // 到付
@@ -553,9 +601,8 @@ export default {
         }
       });
     },
-    // 职工卡支付
+    // 【职工卡、一卡通、雄伟一卡通】支付
     empCarPay(params) {
-      console.log(params);
       submitOrder(params).then(res => {
         if (res.result == "0") {
           this.confirmOrder(res.data.orderId);
@@ -565,7 +612,6 @@ export default {
         }
       });
     },
-
     confirmOrder(orderId) {
       orderPaid(orderId)
         .then(res => {

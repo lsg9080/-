@@ -69,7 +69,7 @@ export default {
   methods: {
     srn_recomm () {
       let params = {
-        'weixinNo': window.globalDataPool.openid,
+        'weixinNo': this.$store.getters.openid,
         'authCode': '',
         'reduceWeight': this.srn_reduceWeight,
         'sex': this.srn_sex,

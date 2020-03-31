@@ -1,5 +1,4 @@
-
-import { request, axiosByJson,o_axiosByJson } from './https'
+import { request, axiosByJson, o_axiosByJson } from './https'
 // import fetch from './common/js/fetch'
 
 // http://yydc.qiluhospital.com/patientOrdering.api/api/Patient/GetOpenid
@@ -12,7 +11,7 @@ export const getOpenid = (authCode, opencode, pageURL = "/Sindex") => request('a
 export const getStaffInfo = () => request('api/StaffOrder/GetStaffInfo', {});
 
 //绑定
-export const bindingStaff = (params) => request('api/StaffOrder/BindingStaff', { ...params });
+export const bindingStaff = (params) => request('api/StaffOrder/BindingStaff', {...params });
 
 // 解绑
 export const bindingDelete = () => request('api/StaffOrder/BindingDelete', {});
@@ -25,7 +24,7 @@ export const getSmsCode = (phone) => request('api/StaffOrder/GetSmsCode', {
 });
 
 // 设置营养标准
-export const nutritionStandard = (params) => request('api/StaffOrder/NutritionStandard', { ...params });
+export const nutritionStandard = (params) => request('api/StaffOrder/NutritionStandard', {...params });
 
 // 获取店铺列表
 export const getShopList = () => request('api/StaffOrder/GetShopList', {});
@@ -49,7 +48,7 @@ export const getStandardNutrition = () => request('api/StaffOrder/GetStandardNut
 export const getPaymentList = (shopId) => request('api/StaffOrder/GetPaymentList', { shopId });
 
 // 设置地址信息
-export const staffAddress = (params) => request('api/StaffOrder/StaffAddress', { ...params });
+export const staffAddress = (params) => request('api/StaffOrder/StaffAddress', {...params });
 
 // 获取地址信息
 export const getAddressList = (shopId) => request('api/StaffOrder/GetAddressList', { shopId });
@@ -81,10 +80,16 @@ export const orderPaid = (orderId) => request('api/StaffOrder/OrderPaid', {
     tradeId: ''
 });
 
+/** 
+ *  当前台传参，后台接收数据为null时，使用axiosByJson方法 
+ * 
+ */
 
+// 使用场景： 链接带参数 （职工卡号作为openid）
+export const editStaff = (params) => axiosByJson('api/StaffOrder/EditStaff', {...params });
 // json提交
-export const getPrepayid = (params) => axiosByJson('api/StaffOrder/GetPrepayid', { ...params });
-export const submitOrder = (params) => axiosByJson('api/StaffOrder/SubmitOrder', { ...params });
+export const getPrepayid = (params) => axiosByJson('api/StaffOrder/GetPrepayid', {...params });
+export const submitOrder = (params) => axiosByJson('api/StaffOrder/SubmitOrder', {...params });
 // 获取订单列表
 export const getOrderList = (pageSize, pageNum) => o_axiosByJson('api/StaffOrder/GetOrderList', {
     'authCode': '101FCC56AB9147F69E75AC7AAC52D2BB',

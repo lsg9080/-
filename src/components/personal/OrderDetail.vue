@@ -84,7 +84,7 @@ import {
   orderRefund
 } from "@/serve"; //
 import payUtils from "@/common/js/wechat";
-import { wechatAppId } from "@/config/auth";
+import { wechatAppId } from "@/config/env";
 import { encryptDes } from "@/common/js/utils"; //encryptionPay,
 import { formatDate } from "@/getParams";
 export default {

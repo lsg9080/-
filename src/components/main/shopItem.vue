@@ -1,6 +1,5 @@
 <template>
   <div class="sm">
-
     <!-- food info -->
     <section ref="header" class="page-hd">
       <!-- business info -->
@@ -12,7 +11,7 @@
           <div class="sm_bi_cont_name">
             <label>{{sm_shopInfo.shopName}}</label>
 
-            <button @click="sm_shopList_overlay=true">换餐厅</button>
+            <button @click="ona">换餐厅</button>
             <img
               v-if="sm_shopInfo.contact"
               src="../../assets/Smain/callphone.png"
@@ -29,9 +28,7 @@
       <!-- select time info -->
       <div class="sm_sti" @click.stop="sm_stiReserve">
         <img class="sm_sti_reserve" src="../../assets/Smain/yudin.png" />
-        <label
-          class="sm_sti_txt"
-        >{{formatOrderDate}}</label>
+        <label class="sm_sti_txt">{{formatOrderDate}}</label>
         <img class="sm_sti_down" src="../../assets/Smain/down.png" />
         <div class="clearboth"></div>
       </div>
@@ -117,9 +114,7 @@
             <label>营养分析</label>
           </div>
         </div>
-        <div
-          class="sm_spp_panel_data"
-        >{{formatOrderDate}}</div>
+        <div class="sm_spp_panel_data">{{formatOrderDate}}</div>
         <div class="sm_spp_panel_list">
           <div v-if="sm_repast_un.length > 0">
             <div v-for="(itemRepast) in sm_repast_un" :key="itemRepast.repastId">
@@ -154,9 +149,7 @@
         </div>
       </div>
       <div v-show="!sm_spp_panel_show" class="sm_spp_panel">
-        <div
-          class="sm_spppn_title"
-        >&nbsp;&nbsp;{{formatOrderDate}}</div>
+        <div class="sm_spppn_title">&nbsp;&nbsp;{{formatOrderDate}}</div>
         <div class="sm_spppn_pxline"></div>
         <div class="sm_spppn_energy">
           <div class="sm_spppn_energy_title">能量摄入</div>
@@ -215,21 +208,24 @@
           <div class="sm_shopList_overlayCont_shoplist">
             <div class="sm_shopList_overlayCont_shoplist_title">请选择餐厅</div>
 
-            <div class="sm_shopList_overlayCont_shoplist_cont">
-              <div class="content">
-                <div
-                  @click="switchShop(index,item.shopId)"
-                  :class="[{'sm_slolcslc_itemS':switchShopId==item.shopId},'sm_slolcslc_item']"
-                  v-for="(item, index) in sm_shopList"
-                  :key="item.shopId"
-                >
-                  <label class="sm_slolcslc_item_img">
-                    <img src="../../assets/Smain/choose.png" v-show="switchShopId==item.shopId" />
-                  </label>
-                  <label class="sm_slolcslc_item_name">{{item.shopName}}</label>
+            <swiper :options="swiperOption">
+              <swiper-slide class="text">
+                <div class="content">
+                  <div
+                    @click="switchShop(index,item.shopId)"
+                    :class="[{'sm_slolcslc_itemS':switchShopId==item.shopId},'sm_slolcslc_item']"
+                    v-for="(item, index) in sm_shopList"
+                    :key="item.shopId"
+                  >
+                    <label class="sm_slolcslc_item_img">
+                      <img src="../../assets/Smain/choose.png" v-show="switchShopId==item.shopId" />
+                    </label>
+                    <label class="sm_slolcslc_item_name">{{item.shopName}}</label>
+                  </div>
                 </div>
-              </div>
-            </div>
+              </swiper-slide>
+              <div class="swiper-scrollbar" slot="scrollbar"></div>
+            </swiper>
 
             <div class="sm_shopList_overlayCont_shoplist_btn">
               <van-button @click.self.stop="sm_chooseShop" large color="#8db0d0">确 定</van-button>
@@ -245,12 +241,28 @@
         </div>
       </div>
     </van-overlay>
+
     <van-overlay :show="sm_sti_overlay">
       <div class="sm_sti_overlay_cont">
         <div class="sm_sti_overlay_contM">
           <div class="sm_sti_overlay_contM_item">
             <div class="sm_sti_overlay_contM_item_title">预定日期</div>
-            <div class="sm_sti_overlay_contM_item_list">
+
+            <swiper :options="swiperOption">
+              <swiper-slide class="text">
+                <div class="content">
+                  <div
+                    @click.self.stop="sm_chooseResverTime(index)"
+                    class="sm_sti_overlay_contM_item_list_item"
+                    :class="selectShopDateIndex==index?'primary-text':''"
+                    v-for="(item, index) in sm_sti_serverTimeList"
+                    :key="index"
+                  >{{item.orderDate}}&nbsp;{{item.week}}</div>
+                </div>
+              </swiper-slide>
+              <div class="swiper-scrollbar" slot="scrollbar"></div>
+            </swiper>
+            <!-- <div class="sm_sti_overlay_contM_item_list">
               <div
                 @click.self.stop="sm_chooseResverTime(index)"
                 class="sm_sti_overlay_contM_item_list_item"
@@ -258,7 +270,7 @@
                 v-for="(item, index) in sm_sti_serverTimeList"
                 :key="index"
               >{{item.orderDate}}&nbsp;{{item.week}}</div>
-            </div>
+            </div> -->
           </div>
           <div class="sm_sti_overlay_contM_close">
             <img
@@ -310,13 +322,26 @@
         <div class="sm_ov_nutri_panel">
           <div class="sm_ov_nutri_panel_panel">
             <div class="sm_sti_overlay_contM_item_title">服务时间</div>
-            <div class="sm_sti_overlay_contM_item_panel">
+             <swiper :options="swiperOption">
+              <swiper-slide class="text">
+                <div class="content">
+                  <div v-for="(item, index) in sm_servertime" :key="index">
+                    <div
+                      class="sm_sti_overlay_contM_item_panel_item"
+                    >{{item.repastName}}&nbsp;{{item.orderStartTime}}-{{item.orderEndTime}}</div>
+                  </div>
+                </div>
+              </swiper-slide>
+              <div class="swiper-scrollbar" slot="scrollbar"></div>
+            </swiper>
+
+            <!-- <div class="sm_sti_overlay_contM_item_panel">
               <div v-for="(item, index) in sm_servertime" :key="index">
                 <div
                   class="sm_sti_overlay_contM_item_panel_item"
                 >{{item.repastName}}&nbsp;{{item.orderStartTime}}-{{item.orderEndTime}}</div>
               </div>
-            </div>
+            </div> -->
           </div>
           <div class="sm_ov_nutri_panel_close">
             <img @click="sm_ov_servertime_overlay_close" src="../../assets/Smain/close.png" />
@@ -335,12 +360,21 @@ import {
   getShopList
 } from "@/serve";
 import { mapState } from "vuex";
-
-let vm;
+//import BScroll from "better-scroll";
+let vm; //, Overlay;
 
 export default {
   data() {
     return {
+      swiperOption: {
+        direction: "vertical",
+        slidesPerView: "auto",
+        freeMode: true,
+        scrollbar: {
+          el: ".swiper-scrollbar"
+        },
+        mousewheel: true
+      },
       sm_shopList_overlay: true,
       sm_shopList: [],
       sm_shop_choose_id: "",
@@ -390,7 +424,8 @@ export default {
       sm_s_finZ: "0%",
       sm_s_finT: "0%",
       isClosed: false,
-      switchShopId: null
+      switchShopId: null,
+      scroll: null
     };
   },
   // 自执行
@@ -412,22 +447,44 @@ export default {
     // 获取商家列表
     this.getShopList();
   },
+  mounted() {},
   computed: {
     ...mapState(["restaurantId"]),
     options() {
       return { click: false, stopPropagation: true, bounce: false };
     },
     formatOrderDate() {
-      let formatDate = ''
-      if(this.sm_sti_serverTimeList.length){
-        const date =  this.sm_sti_serverTimeList[this.selectShopDateIndex].orderDate;
+      let formatDate = "";
+      if (this.sm_sti_serverTimeList.length) {
+        const date = this.sm_sti_serverTimeList[this.selectShopDateIndex]
+          .orderDate;
         const week = this.sm_sti_serverTimeList[this.selectShopDateIndex].week;
-        formatDate =`${date} ${week}`
+        formatDate = `${date} ${week}`;
       }
       return formatDate;
     }
   },
   methods: {
+    ona() {
+      this.sm_shopList_overlay = !this.sm_shopList_overlay;
+      this.$nextTick(() => {
+        setTimeout(() => {
+          this.$refs.Overlay.refresh();
+          // if (!Overlay) {
+          //   Overlay = new BScroll(this.$refs.Overlay, {
+          //     scrollY: true,
+          //     // click: true,
+          //     bounce: true,
+          //     scrollbar: true,
+          //     momentumLimitDistance: 5
+          //   });
+          console.log(this.$refs.Overlay);
+          // } else {
+          //   Overlay.refresh();
+          // }
+        }, 20);
+      });
+    },
     onScrollHandle() {
       console.log(111);
     },
@@ -913,16 +970,41 @@ export default {
     }
   },
   watch: {},
-  destroyed() {},
-  mounted() {
-    // this.$nextTick(() => {
-    //   let wrapper = document.querySelector("#shopscroll");
-    //   let scroll = new BScroll(wrapper);
-    // });
-  }
+  destroyed() {}
 };
 </script>
 
 <style lang="stylus">
 @import '../../common/styles/market.css';
+
+.swiper-container {
+  width: 100%;
+  flex: 1;
+}
+
+.swiper-slide.text {
+  font-size: 18px !important;
+  text-align: left !important;
+  height: auto;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+
+  > .content {
+    > .title {
+      margin: 0;
+      text-align: center;
+      margin-bottom: 0.75em;
+    }
+
+    > p, blockquote {
+      line-height: 2;
+      text-indent: 2em;
+    }
+
+    blockquote {
+      background-color: #ddd;
+      margin-left: 2em;
+    }
+  }
+}
 </style>

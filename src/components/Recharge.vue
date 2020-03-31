@@ -40,7 +40,7 @@
 import { getStaffInfo, getPrepayid } from "@/serve"; //
 import payUtils from "@/common/js/wechat";
 import { encryptDes } from "@/common/js/utils"; //encryptionPay,
-import { wechatAppId } from "@/config/auth";
+import { wechatAppId } from "@/config/env";
 import { formatDate } from "@/getParams";
 
 export default {

@@ -34,7 +34,7 @@
 import { getStaffInfo, getOpenid } from "@/serve";
 import { urlQueryParams, encryption } from "../getParams.js";
 import { mapState } from "vuex";
-import { wechatAppId, homePage } from "@/config/auth.js";
+import { wechatAppId, homePage } from "@/config/env.js";
 export default {
   data() {
     return {

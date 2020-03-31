@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="container">
     <img class="si_cover" src="../assets/Sindex/t3.jpg" />
     <div class="si_cell">
       <div
@@ -27,13 +27,16 @@
 </template>
 
 <script>
-import { getStaffInfo, getOpenid } from "@/serve";
+import { getStaffInfo, getOpenid, editStaff, getCompanyList } from "@/serve";
 import { urlQueryParams, encryption } from "../getParams.js";
 import { mapState } from "vuex";
-import { wechatAppId, homePage } from "@/config/auth.js";
+import { wechatAppId, homePage } from "@/config/env.js";
+// import { swiper, swiperSlide } from "vue-awesome-swiper";
+
 export default {
   data() {
     return {
+      staff: null, //仅地址中帶staff时，直接代入住院号当作openid，自动绑定登录
       cells: [
         {
           desc: "在线订餐",
@@ -69,21 +72,14 @@ export default {
       si_overlay: true
     };
   },
+
   // 自执行
   created: function() {
     // this.$store.commit("RECORD_OPENID", "ocWCVwjK_kseL-qYB83YuQYk6l3Q");
     // window.localStorage.removeItem("openid")
-    // window.localStorage.setItem("openid", "o1ixfwI3WBM1zq91r_Rh7vvcJj-s");
-    // window.localStorage.setItem("openid", "oMrcc5A7etjdfb9ClHbNJ97d0UVM");
-    // this.$store.commit("RECORD_OPENID", 'o1ixfwI3WBM1zq91r_Rh7vvcJj-s');
     // 获取openid
     //  this.$store.commit("LOGOUT");
-    this.staffOpenid();
-  },
-  computed: {
-    ...mapState(["openid"])
-  },
-  methods: {
+
     /**
      * 是否有微信
      * 1、没有微信：
@@ -92,61 +88,113 @@ export default {
      * http://ceshi.wincome.group/?code=071DQjed0w0uiz1hZPed0vAxed0DQjeR&state=123
      *
      **/
-    staffOpenid() {
-      console.log(111)
-      var queryParams = urlQueryParams(window.location.href);
-        var staff = queryParams.staff;
-        var opencode = queryParams.code;
-      if (this.openid) {
-        
-        if (staff) {
-          this.$store.commit("RECORD_OPENID",staff );
-          this.si_overlay = false;
-        }else{
-          this.$store.commit("RECORD_OPENID", this.openid);
-          this.si_overlay = false;
+    var queryParams = urlQueryParams(window.location.href);
+    var staff = queryParams.staff;
+    var opencode = queryParams.code;
+
+    
+    if (this.openid) {
+      if (staff) {
+        this.bind(staff);
+        this.$store.commit("RECORD_OPENID", staff);
+        this.si_overlay = false;
+        this.cells.splice(3,1)
+      } else {
+        this.$store.commit("RECORD_OPENID", this.openid);
+        this.si_overlay = false;
+      }
+    } else {
+      if (staff) {
+        this.bind(staff);
+        this.$store.commit("RECORD_OPENID", staff);
+        this.si_overlay = false;
+        this.cells.splice(3,1)
+      } else {
+        this.staffOpenid(opencode);
+      }
+    }
+  },
+  computed: {
+    ...mapState(["openid"])
+  },
+  methods: {
+    bind(staff) {
+      /**
+       * http://njet.wincome.group:8082/OrderEdit.aspx?staff={职工卡号}
+       * staff   staffCode、certno
+       *
+       */
+      getCompanyList().then(res => {
+        let data = res.data;
+        if (res.result === "0") {
+          let companyName = data[0].companyName,
+            companyId = data[0].companyId;
+
+          let params = {
+            staffCode: staff,
+            staffName: staff,
+            phone: "",
+            companyId: companyId,
+            companyName: companyName,
+            smsCode: 99999,
+            certno: staff
+          };
+          editStaff(params)
+            .then(data => {
+              console.log(data);
+
+              this.si_overlay = false;
+            })
+            .catch(err => {
+              console.log(err);
+              this.si_overlay = false;
+            });
+        } else {
+          this.$toast({
+            message: res.msg,
+            forbidClick: true,
+            duration: 3000
+          });
         }
-      
-      }else{
- 
-        if (staff) {
-          this.$store.commit("RECORD_OPENID",staff );
-          this.si_overlay = false;
-        }else{
-          
-          if (opencode === "" || opencode == undefined || opencode == null) {
-            // 通过Aauth2 进行微信授权，获取openid
-            window.location.href =
-              "https://open.weixin.qq.com/connect/oauth2/authorize?appid=" +
-              wechatAppId +
-              "&redirect_uri=" +
-              homePage +
-              "&response_type=code&scope=snsapi_base&state=123#wechat_redirect";
-          } else {
-            let authCode = encryption("wincome", 230);
-            getOpenid(authCode, opencode)
-              .then(data => {
-                console.log(data);
-                if (data.result == 0) {
-                  this.$store.commit("RECORD_OPENID", data.openid);
-                  console.log("openid||" + data.openid);
-                }
-                this.si_overlay = false;
-              })
-              .catch(err => {
-                console.log(err);
-                this.si_overlay = false;
-              });
-          } 
-        }
+      });
+    },
+    staffOpenid(opencode) {
+      if (opencode === "" || opencode == undefined || opencode == null) {
+        // 通过Aauth2 进行微信授权，获取openid
+        window.location.href =
+          "https://open.weixin.qq.com/connect/oauth2/authorize?appid=" +
+          wechatAppId +
+          "&redirect_uri=" +
+          homePage +
+          "&response_type=code&scope=snsapi_base&state=123#wechat_redirect";
+      } else {
+        let authCode = encryption("wincome", 230);
+        getOpenid(authCode, opencode)
+          .then(data => {
+            if (data.result == 0) {
+              this.$store.commit("RECORD_OPENID", data.openid);
+              console.log("openid||" + data.openid);
+            }
+            this.si_overlay = false;
+          })
+          .catch(err => {
+            console.log(err);
+            this.si_overlay = false;
+          });
       }
     },
 
     toLink(index) {
-      if (index == 3) {
-        this.employeeCard();
+      if (this.$store.state.openid) {
+        this.$router.push({
+          name: this.cells[index].route
+        });
       } else {
-        this.getStaffInfo(index);
+        if (index == 3) {
+          this.employeeCard();
+        } else {
+          this.getStaffInfo(index);
+        }
       }
     },
     /**
@@ -158,7 +206,7 @@ export default {
         .then(res => {
           if (res.result === "0") {
             console.log("已经绑定过");
-            if (res.data.age == 0 && (index == 0||index == 1)) {
+            if (res.data.age == 0 && (index == 0 || index == 1)) {
               this.$router.push({
                 name: "Srecomm"
               });
@@ -205,12 +253,16 @@ export default {
 </script>
 
 <style scoped>
+.container{
+  height: 100%;
+  background: #fff;
+}
 .si_cover {
   width: 100%;
 }
 .si_cell {
   width: 90%;
-      padding: 0 5%;
+  padding: 0 5%;
   background: #fff;
 }
 .si_cell_item {

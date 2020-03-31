@@ -16,34 +16,34 @@ new GeneraterAssetPlugin({
 
 
 module.exports = {
-  devServer: {
-    proxy: {
-      '/api': {
-        target: 'https://staffapis.wincome.group/staffOrderingH5.API/',
-        ws: true,//是否代理websockets
-        changeOrigin: true,   // 设置同源  默认false，是否需要改变原始主机头为目标URL
-        pathRewrite: {
-          '^/api':  '/'//这里理解成用‘/api’代替target里面的地址，后面组件中我们掉接口时直接用api代替 比如我要调用'http://40.00.100.100:3002/user/add'，直接写‘/api/user/add’即可
+    // devServer: {
+    //   proxy: {
+    //     '/api': {
+    //       target: 'https://staffapis.wincome.group/staffOrderingH5.API/',
+    //       ws: true,//是否代理websockets
+    //       changeOrigin: true,   // 设置同源  默认false，是否需要改变原始主机头为目标URL
+    //       pathRewrite: {
+    //         '^/api':  '/'//这里理解成用‘/api’代替target里面的地址，后面组件中我们掉接口时直接用api代替 比如我要调用'http://40.00.100.100:3002/user/add'，直接写‘/api/user/add’即可
+    //       }
+    //     }
+    //   }
+    // },
+
+    css: {
+        loaderOptions: {
+            stylus: {
+                'resolve url': true,
+                'import': [
+                    './src/theme'
+                ]
+            }
         }
-      }
-    }
-  },
- 
-  css: {
-    loaderOptions: {
-      stylus: {
-        'resolve url': true,
-        'import': [
-          './src/theme'
-        ]
-      }
-    }
-  },
-  pluginOptions: {
-    'cube-ui': {
-      postCompile: true,
-      theme: true
-    }
-  },
-  assetsDir: "static"
+    },
+    pluginOptions: {
+        'cube-ui': {
+            postCompile: true,
+            theme: true
+        }
+    },
+    assetsDir: "static"
 }
